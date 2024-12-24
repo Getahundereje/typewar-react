@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Allura&family=Lobster&family=Onest:wght@100..900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/signup.styles.css" />
+  </head>
+  <body>
+    <section class="container">
+      <p class="title">Sign Up <span>Sign up to continue</span></p>
+      <form action="#" method="post">
+        <input
+          type="text"
+          name="fullname"
+          id="fullname"
+          placeholder=""
+          class="input"
+        />
+        <label for="fullname">Full Name</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder=""
+          class="input"
+        />
+        <label for="email">Email</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder=""
+          class="input"
+        />
+        <label for="password">Password</label>
+        <a type="submit" class="sign-up">Sign up</a>
+        <input
+          type="checkbox"
+          name="remember-me"
+          id="remember-me"
+          class="checkbox"
+        />
+        <label for="remember-me">Remember me</label>
+      </form>
+      <div class="alternative-options">
+        <a href="#">
+          <img src="images/google-logo.png" alt="google-logo" />
+        </a>
+        <a href="#">
+          <img src="images/facebook-logo.png" alt="facebook-logo" />
+        </a>
+        <a href="#"><img src="images/twitter-logo.png" alt="twitter-logo" /></a>
+      </div>
+    </section>
+    <p class="have-account">
+      Already have an account <span><a href="login.html">Sign in</a></span>
+    </p>
+    <script src="js/class/word.js"></script>
+    <script src="js/data/data.js"></script>
+    <script src="js/utills/service/service.functions.js"></script>
+    <script src="js/authentication/authentication.js" type="module"></script>
+  </body>
+</html>
