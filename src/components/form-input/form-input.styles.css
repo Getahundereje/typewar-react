@@ -1,0 +1,78 @@
+.input-group {
+    position: relative;
+    height: 30px;
+}
+
+input {
+    height: 2rem;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.651);
+    background-color: transparent;
+}
+    
+input:focus {
+    border: none;
+    outline: none;
+    border-bottom: 1px solid rgba(252, 4, 4, 0.486);
+    background-color: transparent;
+}
+  
+input:focus.valid-input {
+    border: none;
+    outline: none;
+    border-bottom: 1px solid rgba(24, 250, 62, 0.5);
+    background-color: transparent;
+}
+
+input:not([type="checkbox"]):focus~ label {
+    top: -14px;
+    font-size: 12px;
+}
+
+input:not(:placeholder-shown):not([type="checkbox"]) + label {
+    top: -14px;
+    font-size: 12px;
+}
+  
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+  
+input[type="checkbox"]:checked {
+    background-color: #0051ff;
+    border-color: #0051ff;
+}
+  
+input[type="checkbox"]:checked::after {
+    content: "✔";
+    font-size: 14px;
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+label {
+    font-size: 16px;
+    font-family: "Rajdhani", serif;
+    position: absolute;
+    pointer-events: none;
+    left: 0px;
+    top: 10px;
+    transition: 300ms ease all;
+}
+
+input[type="checkbox"] ~ label {
+    left: 30px;
+    top: 0;
+}
