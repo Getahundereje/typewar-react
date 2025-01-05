@@ -1,0 +1,33 @@
+.menu-button {
+  font-family: "Lilita One", serif;
+  font-size: 40px;
+  margin-top: 1rem;
+  padding: 5px;
+  color: #4c585b;
+  background-color: transparent;
+  position: relative;
+  border: none;
+  width: 70%;
+}
+
+.menu-button:focus {
+  color: #f4edd3;
+  background-color: #a5bfcc;
+  outline: none;
+  border-top: 1px solid #f4edd3;
+  border-bottom: 1px solid #f4edd3;
+}
+
+.menu-button:focus:after {
+  content: "";
+  background-image: url("/assets/game-assets/images/archer-icon.png");
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  width: 40px;
+  height: 30px;
+  transform: rotate(220deg);
+  z-index: 1;
+}

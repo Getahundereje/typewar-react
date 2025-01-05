@@ -1,6 +1,5 @@
 import { useContext, useRef, useEffect } from "react";
 
-import { Words } from "../../utilis/class/word";
 import { Bullet } from "../../utilis/class/bullet";
 import Gun from "../../utilis/class/gun";
 import { WordsContext } from "../../contexts/words/words.context";
@@ -14,7 +13,7 @@ import "./game.styles.css";
 function handleCharactreClick(canvasContext, canvas, wordsContext, bullets, e) {
   if (e.keyCode >= 65 && e.keyCode <= 90) {
     if (!wordsContext.currentSelectedWord) {
-      console.log(wordsContext.currentSelectedWord)
+      console.log(wordsContext.currentSelectedWord);
       wordsContext.updateCurrentSelectedWord(
         wordsContext.currentSelectedWords.getWord(e.key)
       );
@@ -109,12 +108,10 @@ function GamePage() {
   const wordsContext = useContext(WordsContext);
   const {
     wordsCollection,
-    updateWordsCollection,
     currentSelectedWords,
     currentSelectedWord,
     updateCurrentSelectedWord,
     selectedWordInfo,
-    updateSelectedWordInfo,
   } = wordsContext;
 
   const { bullets } = useContext(BulletsContext);
@@ -137,7 +134,8 @@ function GamePage() {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
         if (firstTime) {
-          document.body.addEventListener("keydown",
+          document.body.addEventListener(
+            "keydown",
             handleCharactreClick.bind(null, ctx, canvas, wordsContext)
           );
 
@@ -178,7 +176,12 @@ function GamePage() {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [wordsCollection, currentSelectedWord, currentSelectedWords, selectedWordInfo]);
+  }, [
+    wordsCollection,
+    currentSelectedWord,
+    currentSelectedWords,
+    selectedWordInfo,
+  ]);
   return (
     <canvas
       ref={canvasRef}

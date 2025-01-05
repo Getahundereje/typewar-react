@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import FormInput from "../../../components/form-input/form-input.componet";
-import CustomButton from "../../../components/custom-button/custom-button.component";
+import CustomButton from "../../../components/form-custom-button/form-custom-button.component";
 
 import "../sign-in-up.styles.css";
 

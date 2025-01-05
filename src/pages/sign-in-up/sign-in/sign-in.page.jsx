@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import FormInput from "../../../components/form-input/form-input.componet";
-import CustomButton from "../../../components/custom-button/custom-button.component";
+import FormCustomButton from "../../../components/form-custom-button/form-custom-button.component";
 
 import "../sign-in-up.styles.css";
 
@@ -27,9 +27,9 @@ function SignIn() {
             placeholder=""
             label="Password"
           />
-          <CustomButton type="submit" className="form-button">
+          <form-custom-button type="submit" className="form-button">
             Sign In
-          </CustomButton>
+          </form-custom-button>
           <FormInput
             type="checkbox"
             name="remember-me"
@@ -39,19 +39,19 @@ function SignIn() {
           />
         </form>
         <div className="alternative-options">
-          <CustomButton className="alternative-options-button">
+          <FormCustomButton className="alternative-options-button">
             <img src="/assets/images/google-logo.png" alt="google-logo" />
-          </CustomButton>
-          <CustomButton className="alternative-options-button">
+          </FormCustomButton>
+          <FormCustomButton className="alternative-options-button">
             <img src="/assets/images/facebook-logo.png" alt="facebook-logo" />
-          </CustomButton>
-          <CustomButton className="alternative-options-button">
+          </FormCustomButton>
+          <FormCustomButton className="alternative-options-button">
             <img
               src="/assets/images/twitter-logo.png"
               alt="twitter-logo"
               style={{ transform: "scale(0.9)" }}
             />
-          </CustomButton>
+          </FormCustomButton>
         </div>
       </section>
       <p className="have-account">
