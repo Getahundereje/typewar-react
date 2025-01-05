@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import SignUp from "./pages/sign-up/sign-up.page";
-import SignIn from "./pages/sign-in/sign-in.page";
+import SignUp from "./pages/sign-in-up/sign-up/sign-up.page";
+import SignIn from "./pages/sign-in-up/sign-in/sign-in.page";
 import GamePage from "./pages/game/game.page";
 
 import { WordsProvider } from "./contexts/words/words.context";

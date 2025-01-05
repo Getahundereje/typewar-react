@@ -1,18 +1,25 @@
 import { Link } from "react-router-dom";
 
-import FormInput from "../../components/form-input/form-input.componet";
-import CustomButton from "../../components/custom-button/custom-button.component";
+import FormInput from "../../../components/form-input/form-input.componet";
+import CustomButton from "../../../components/custom-button/custom-button.component";
 
 import "../sign-in-up.styles.css";
 
-function SignIn() {
+function SignUp() {
   return (
     <>
       <section className="container">
         <p className="title">
-          Sign In <span>Sign in to continue</span>
+          Sign Up <span>Sign up to continue</span>
         </p>
         <form action="#" method="post">
+          <FormInput
+            type="text"
+            name="fullname"
+            id="fullname"
+            placeholder=""
+            label="Full Name"
+          />
           <FormInput
             type="email"
             name="email"
@@ -28,7 +35,7 @@ function SignIn() {
             label="Password"
           />
           <CustomButton type="submit" className="form-button">
-            Sign In
+            Sign up
           </CustomButton>
           <FormInput
             type="checkbox"
@@ -55,13 +62,13 @@ function SignIn() {
         </div>
       </section>
       <p className="have-account">
-        Doesn&apos;t have an account{" "}
+        Already have an account{" "}
         <span>
-          <Link to="/signup">Sign up</Link>
+          <Link to="/signin">Sign in</Link>
         </span>
       </p>
     </>
   );
 }
 
-export default SignIn;
+export default SignUp;
