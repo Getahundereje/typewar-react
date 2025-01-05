@@ -1,5 +1,6 @@
 class Bullet {
-  constructor(x, y, velocity, radius) {
+  constructor(context, x, y, velocity, radius) {
+    this.ctx = context;
     this.x = x;
     this.y = y;
     this.radius = radius;
@@ -7,11 +8,11 @@ class Bullet {
   }
 
   draw() {
-    ctx.beginPath();
-    ctx.fillStyle = "red";
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    this.ctx.beginPath();
+    this.ctx.fillStyle = "red";
+    this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    this.ctx.fill();
+    this.ctx.closePath();
   }
 
   update() {
@@ -59,4 +60,9 @@ class Bullets {
   head() {
     return this.bullets[0];
   }
+}
+
+export {
+  Bullet,
+  Bullets
 }

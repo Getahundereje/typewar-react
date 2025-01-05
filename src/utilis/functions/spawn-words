@@ -4,22 +4,9 @@ function generateWordIndex(wordsCollection) {
   return Math.floor(Math.random() * wordsCollection.length);
 }
 
-function spawnWords(numberOfWords, timeInterval, canvasContext, canvas, currentSelectedWords) {
+function spawnWords(numberOfWords, timeInterval, canvasContext, canvas, currentSelectedWords, wordsCollection) {
   
   let i = 0;
-  const wordsCollection = [
-    "GETAHUN",
-    "NATI",
-    "KALEAB",
-    "JO",
-    "EYOB",
-    "HELLO",
-    "GOODBYE",
-    "GOOD",
-    "BAD",
-    "EVIL",
-    "JOHN",
-  ];
 
   const stopTimer = setInterval(() => {
     const index = generateWordIndex(wordsCollection);
