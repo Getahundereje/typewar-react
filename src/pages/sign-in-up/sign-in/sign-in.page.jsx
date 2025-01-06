@@ -27,9 +27,9 @@ function SignIn() {
             placeholder=""
             label="Password"
           />
-          <form-custom-button type="submit" className="form-button">
+          <FormCustomButton type="submit" className="form-button">
             Sign In
-          </form-custom-button>
+          </FormCustomButton>
           <FormInput
             type="checkbox"
             name="remember-me"

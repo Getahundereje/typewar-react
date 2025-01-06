@@ -1,0 +1,69 @@
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/game-assets/images/menu.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 100%;
+}
+
+.settings-container .card {
+  border: 2px solid #b6a6a65d;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #a5bfcc70;
+  width: 80%;
+  height: 70%;
+}
+
+.settings-container .card .card-header {
+  background-color: #493628;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 30px;
+  text-align: center;
+  border-bottom: 1px solid whitesmoke;
+  font-family: "Bungee Spice", sans-serif;
+}
+
+.settings-container .card .card-body {
+  padding: 15px;
+  font-size: 16px;
+  height: 100%;
+  margin: 0 2rem;
+  color: #333;
+}
+
+.settings-container .game-mode,
+.settings-container .diffculty {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  height: 20%;
+  border-top: 1px solid #f4edd3;
+  border-bottom: 1px solid #f4edd3;
+}
+
+.settings-container .settings-label {
+  font-family: "Bungee Spice", sans-serif;
+  font-size: 20px;
+  display: inline;
+}
+
+.settings-container .radio-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  height: 80%;
+  width: fit-content;
+}

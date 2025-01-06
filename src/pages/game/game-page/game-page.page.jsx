@@ -1,14 +1,14 @@
 import { useContext, useRef, useEffect } from "react";
 
-import { Bullet } from "../../utilis/class/bullet";
-import Gun from "../../utilis/class/gun";
-import { WordsContext } from "../../contexts/words/words.context";
-import { BulletsContext } from "../../contexts/bullets/bullets.context";
+import { Bullet } from "../../../utilis/class/bullet";
+import Gun from "../../../utilis/class/gun";
+import { WordsContext } from "../../../contexts/words/words.context";
+import { BulletsContext } from "../../../contexts/bullets/bullets.context";
 
-import spawnWords from "../../utilis/functions/spawn-words";
-import calculateIntercept from "../../utilis/functions/calculate-intercept";
+import spawnWords from "../../../utilis/functions/spawn-words";
+import calculateIntercept from "../../../utilis/functions/calculate-intercept";
 
-import "./game.styles.css";
+import "./game-page.styles.css";
 
 function handleCharactreClick(canvasContext, canvas, wordsContext, bullets, e) {
   if (e.keyCode >= 65 && e.keyCode <= 90) {

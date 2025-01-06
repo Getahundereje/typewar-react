@@ -1,0 +1,32 @@
+.custom-radio-button {
+  display: none;
+}
+
+.custom-radio-label {
+  display: inline-block;
+  border: 1px solid wheat;
+  padding: 6px 10px;
+  background-color: transparent;
+  color: #432e54;
+  font-family: "Unna", serif;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 15px;
+  cursor: pointer;
+  text-align: center;
+  height: fit-content;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.custom-radio-label:hover {
+  background-color: #754e1a7e;
+  transform: scale(1.05);
+}
+
+.custom-radio-label:active {
+  transform: scale(0.98);
+}
+
+.custom-radio-button:checked + .custom-radio-label {
+  background-color: #dbd2af;
+}

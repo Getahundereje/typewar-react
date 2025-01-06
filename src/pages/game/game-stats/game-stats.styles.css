@@ -1,0 +1,88 @@
+.highscore-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/game-assets/images/menu.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 100%;
+}
+
+.highscore-menu .card {
+  border: 2px solid #b6a6a65d;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #a5bfcc70;
+  width: 80%;
+  height: fit-content;
+}
+.highscore-menu .card .card-header {
+  background-color: #493628;
+  padding: 15px;
+  margin-bottom: 20px;
+  font-size: 30px;
+  text-align: center;
+  font-family: "Bungee Spice", sans-serif;
+}
+
+.highscore-menu .sub-card {
+  border: 2px solid #b6a6a65d;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  height: fit-content;
+  margin: 20px auto;
+}
+
+.highscore-menu .sub-card .sub-card-header {
+  background-color: #493628c7;
+  padding: 10px;
+  font-size: 20px;
+  text-align: center;
+  font-family: "Bungee Spice", sans-serif;
+}
+
+.sub-card .sub-card-body {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px 0 20px;
+}
+
+.highscore-type {
+  background-color: #4936287c;
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  font-family: "Bungee Spice", sans-serif;
+  font-size: 24px;
+}
+
+.highscore-value div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 260px;
+  border-top: 1px solid #f4edd3;
+  border-bottom: 1px solid #f4edd3;
+}
+
+.type {
+  font-family: "Lobster", serif;
+  color: #001a6e;
+  display: inline-block;
+  margin: 2px;
+}
+
+.value {
+  font-family: "Lobster", serif;
+  color: #001a6e;
+}

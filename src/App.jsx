@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SignUp from "./pages/sign-in-up/sign-up/sign-up.page";
 import SignIn from "./pages/sign-in-up/sign-in/sign-in.page";
 import GameHomepage from "./pages/game/homepage/homepage.page";
-import GamePage from "./pages/game/game.page";
+import GamePage from "./pages/game/game-page/game-page.page";
+import SettingsPage from "./pages/game/settings/settings.page";
+import StatsPage from "./pages/game/game-stats/game-stats.page";
 
 import { WordsProvider } from "./contexts/words/words.context";
 import { BulletsProvider } from "./contexts/bullets/bullets.context";
@@ -18,8 +20,12 @@ function App() {
           <Routes>
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
-            <Route path="game" element={<GameHomepage />} />
-            <Route path="gamePage" element={<GamePage />} />
+            <Route path="game">
+              <Route path="homepage" element={<GameHomepage />} />
+              <Route path="gamePage" element={<GamePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="stats" element={<StatsPage />} />
+            </Route>
           </Routes>
         </WordsProvider>
       </BulletsProvider>

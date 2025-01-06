@@ -1,17 +1,16 @@
-import './form-input.styles.css'
+import "./form-input.styles.css";
 
-function FormInput({ handleChange, label, ...otherProps}) {
-    console.log(label)
-    return (
+// eslint-disable-next-line react/prop-types
+function FormInput({ id, label, ...otherProps }) {
+  console.log(label);
+  return (
     <div className="input-group">
-        <input className="form-input" onChange={handleChange} {...otherProps}/>
-        { label ?
-            (
-            <label > {label} </label>
-            ) : null
-        }
+      <input className="form-input" id={id} {...otherProps} />
+      <label className="form-input-label" htmlFor={id}>
+        {label}
+      </label>
     </div>
- );
+  );
 }
 
 export default FormInput;
