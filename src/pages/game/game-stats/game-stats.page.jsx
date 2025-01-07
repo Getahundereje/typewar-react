@@ -1,6 +1,17 @@
+import { useContext } from "react";
+import { UserContext } from "../../../contexts/user/user.context";
+
 import "./game-stats.styles.css";
+import useSessionStorage from "../../../hooks/useSessionStorage";
 
 function StatsPage() {
+  const userContext = useContext(UserContext);
+
+  const [state] = useSessionStorage(
+    "gameState",
+    userContext.user?.gameState || ""
+  );
+
   return (
     <div className="highscore-menu">
       <div className="card">
@@ -13,30 +24,42 @@ function StatsPage() {
               <div className="highscore-value">
                 <div>
                   <span className="type">Easy</span>
-                  <span className="value easy">20</span>
+                  <span className="value easy">
+                    {state.highscore.singlePlayer.staged.easy}
+                  </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
-                  <span className="value normal">10</span>
+                  <span className="value normal">
+                    {state.highscore.singlePlayer.staged.normal}
+                  </span>
                 </div>
                 <div>
-                  <span className="type">Difficult</span>
-                  <span className="value difficult">45</span>
+                  <span className="type">Hard</span>
+                  <span className="value difficult">
+                    {state.highscore.singlePlayer.staged.hard}
+                  </span>
                 </div>
               </div>
               <div className="highscore-type">Timer</div>
               <div className="highscore-value">
                 <div>
                   <span className="type">Easy</span>
-                  <span className="value easy">30</span>
+                  <span className="value easy">
+                    {state.highscore.singlePlayer.timer.easy}
+                  </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
-                  <span className="value normal">50</span>
+                  <span className="value normal">
+                    {state.highscore.singlePlayer.timer.normal}
+                  </span>
                 </div>
                 <div>
-                  <span className="type">Difficult</span>
-                  <span className="value difficult">5</span>
+                  <span className="type">Hard</span>
+                  <span className="value difficult">
+                    {state.highscore.singlePlayer.timer.hard}
+                  </span>
                 </div>
               </div>
             </div>
@@ -48,15 +71,21 @@ function StatsPage() {
               <div className="highscore-value">
                 <div>
                   <span className="type">Easy</span>
-                  <span className="value">30</span>
+                  <span className="value">
+                    {state.highscore.multiPlayer.timer.easy}
+                  </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
-                  <span className="value">50</span>
+                  <span className="value">
+                    {state.highscore.multiPlayer.timer.normal}
+                  </span>
                 </div>
                 <div>
-                  <span className="type">Difficult</span>
-                  <span className="value">5</span>
+                  <span className="type">Hard</span>
+                  <span className="value">
+                    {state.highscore.multiPlayer.timer.hard}
+                  </span>
                 </div>
               </div>
             </div>

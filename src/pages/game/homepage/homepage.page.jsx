@@ -48,7 +48,7 @@ function GameHomepage() {
     buttonsRef[focusedButtonId].current.focus();
     if (firstTime) {
       document.addEventListener("keydown", handleArrowClick);
-      document.addEventListener("click", handleClick);
+      document.addEventListener("mousedown", handleClick);
 
       setFirstTime(false);
     }

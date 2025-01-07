@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import FormInput from "../../../components/form-input/form-input.componet";
 import FormCustomButton from "../../../components/form-custom-button/form-custom-button.component";
+import { UserContext } from "../../../contexts/user/user.context";
 
 import "../sign-in-up.styles.css";
 
@@ -15,9 +17,15 @@ function SignUp() {
   const [passwordIsValid, setPasswordIsValid] = useState(false);
   const [fullNameIsValid, setFullNameIsValid] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const userContext = useContext(UserContext);
+  const navigate = useNavigate();
+
   function handleChanges(e) {
     e.preventDefault();
 
+    setErrorMessage("");
     const { name, value } = e.target;
     if (name === "email") {
       setEamil(value);
@@ -25,6 +33,52 @@ function SignUp() {
       setPassword(value);
     } else if (name === "fullname") {
       setFullName(value);
+    }
+  }
+
+  function checkInputValidity() {
+    if (!email || !fullName || !password) {
+      setErrorMessage("Please fill all input areas!");
+      return false;
+    }
+
+    if (!emailIsValid) {
+      setErrorMessage("Please put appropriate email address!");
+      return false;
+    }
+
+    if (!passwordIsValid) {
+      setErrorMessage("Please put password of length of 8 or more!");
+      return false;
+    }
+    return true;
+  }
+
+  async function handleSignUpWithEmail(e) {
+    e.preventDefault();
+
+    if (!checkInputValidity()) return;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/auth/email/signup",
+        {
+          fullname: fullName,
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      const { data } = response;
+      userContext.updateUser(data.data);
+
+      if (data.status === "succuss") {
+        navigate("/game/homepage");
+      }
+    } catch (error) {
+      setErrorMessage(error.response.data.message);
     }
   }
 
@@ -87,9 +141,14 @@ function SignUp() {
             isValid={passwordIsValid}
             onChange={handleChanges}
           />
-          <FormCustomButton type="submit" className="form-button">
+          <FormCustomButton
+            type="submit"
+            className="form-button"
+            onClick={handleSignUpWithEmail}
+          >
             Sign up
           </FormCustomButton>
+          {errorMessage ? <p className="error-message">{errorMessage}</p> : ""}
           <FormInput
             type="checkbox"
             name="remember-me"

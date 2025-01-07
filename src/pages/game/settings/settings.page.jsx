@@ -1,26 +1,42 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import FormSliderInput from "../../../components/form-slider/form-slider.component";
 import RadioButton from "../../../components/custom-radio-button/custom-radio-button.component";
+import { UserContext } from "../../../contexts/user/user.context";
+import useSessionStorage from "../../../hooks/useSessionStorage";
 
 import "./settings.styles.css";
 
 function SettingsPage() {
-  const [sound, setSound] = useState(50);
-  const [gameSound, setGameSound] = useState(50);
+  const userContext = useContext(UserContext);
+  const [sound, setSound] = useState(0);
+  const [gameSound, setGameSound] = useState(0);
+  const [gameMode, setGameMode] = useState("staged");
+  const [diffculty, setDiffculty] = useState("easy");
 
-  const soundObj = {
-    sound: (value) => setSound(value),
-    gameSound: (value) => setGameSound(value),
-  };
+  const [state, setState] = useSessionStorage(
+    "gameState",
+    userContext.user?.gameState || ""
+  );
 
   function handleChange(e) {
-    e.preventDefault();
+    const { name, value } = e.target;
 
-    const { value, name } = e.target;
-
-    soundObj[name](Number(value));
+    setState((prevState) => ({
+      ...prevState,
+      setting: {
+        ...prevState.setting,
+        [name]: value,
+      },
+    }));
   }
+
+  useEffect(() => {
+    setSound(state.setting.soundVolume);
+    setGameSound(state.setting.gameSoundVolume);
+    setGameMode(state.setting.gameMode);
+    setDiffculty(state.setting.difficulty);
+  }, [state]);
 
   return (
     <div className="settings-container">
@@ -30,7 +46,7 @@ function SettingsPage() {
           <FormSliderInput
             label="sound"
             type="range"
-            name="sound"
+            name="soundVolume"
             min="0"
             max="100"
             value={sound}
@@ -39,7 +55,7 @@ function SettingsPage() {
           <FormSliderInput
             label="Game sound"
             type="range"
-            name="gameSound"
+            name="gameSoundVolume"
             min="0"
             max="100"
             value={gameSound}
@@ -54,7 +70,8 @@ function SettingsPage() {
                 type="radio"
                 name="gameMode"
                 value="staged"
-                checked
+                checked={gameMode === "staged"}
+                onChange={handleChange}
               />
               <RadioButton
                 label="Timer"
@@ -62,6 +79,8 @@ function SettingsPage() {
                 type="radio"
                 name="gameMode"
                 value="timer"
+                checked={gameMode === "timer"}
+                onChange={handleChange}
               />
               <RadioButton
                 label="Practice"
@@ -69,6 +88,8 @@ function SettingsPage() {
                 type="radio"
                 name="gameMode"
                 value="practice"
+                checked={gameMode === "practice"}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -81,7 +102,8 @@ function SettingsPage() {
                 id="easy"
                 name="difficulty"
                 value="easy"
-                checked
+                checked={diffculty === "easy"}
+                onChange={handleChange}
               />
               <RadioButton
                 label="Normal"
@@ -89,6 +111,8 @@ function SettingsPage() {
                 id="normal"
                 name="difficulty"
                 value="normal"
+                checked={diffculty === "normal"}
+                onChange={handleChange}
               />
               <RadioButton
                 label="Hard"
@@ -96,6 +120,8 @@ function SettingsPage() {
                 id="hard"
                 name="difficulty"
                 value="hard"
+                checked={diffculty === "hard"}
+                onChange={handleChange}
               />
             </div>
           </div>

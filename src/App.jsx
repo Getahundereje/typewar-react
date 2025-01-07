@@ -9,26 +9,29 @@ import StatsPage from "./pages/game/game-stats/game-stats.page";
 
 import { WordsProvider } from "./contexts/words/words.context";
 import { BulletsProvider } from "./contexts/bullets/bullets.context";
+import { UserProvider } from "./contexts/user/user.context";
 
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
-      <BulletsProvider>
-        <WordsProvider>
-          <Routes>
-            <Route path="signin" element={<SignIn />} />
-            <Route path="signup" element={<SignUp />} />
-            <Route path="game">
-              <Route path="homepage" element={<GameHomepage />} />
-              <Route path="gamePage" element={<GamePage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="stats" element={<StatsPage />} />
-            </Route>
-          </Routes>
-        </WordsProvider>
-      </BulletsProvider>
+      <UserProvider>
+        <BulletsProvider>
+          <WordsProvider>
+            <Routes>
+              <Route path="signin" element={<SignIn />} />
+              <Route path="signup" element={<SignUp />} />
+              <Route path="game">
+                <Route path="homepage" element={<GameHomepage />} />
+                <Route path="gamePage" element={<GamePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="stats" element={<StatsPage />} />
+              </Route>
+            </Routes>
+          </WordsProvider>
+        </BulletsProvider>
+      </UserProvider>
     </BrowserRouter>
   );
 }

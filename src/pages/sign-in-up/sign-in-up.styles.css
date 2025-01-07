@@ -15,6 +15,7 @@ body {
 
 form {
   display: flex;
+  position: relative;
   flex-direction: column;
   justify-content: space-around;
   width: 100%;
@@ -33,7 +34,7 @@ form {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -55%);
-  width: 30%;
+  width: 400px;
   height: 80%;
   border: 1px solid rgba(0, 0, 0, 0.185);
   border-radius: 5px;
@@ -49,6 +50,14 @@ form {
   font-size: 25px;
   font-family: "Allura", serif;
   display: block;
+}
+
+.error-message {
+  position: absolute;
+  top: 75%;
+  color: red;
+  font-family: "Rajdhani", serif;
+  font-weight: 500;
 }
 
 .alternative-options {

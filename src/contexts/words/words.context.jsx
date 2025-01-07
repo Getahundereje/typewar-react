@@ -1,9 +1,10 @@
 import { createContext, useState, useMemo } from "react";
 
-import { Words } from '../../utilis/class/word'
+import { Words } from "../../utilis/class/word";
 
 const WordsContext = createContext();
 
+// eslint-disable-next-line react/prop-types
 function WordsProvider({ children }) {
   const [currentSelectedWords] = useState(new Words());
   const [currentSelectedWord, setCurrentSelectedWord] = useState(undefined);
@@ -22,27 +23,33 @@ function WordsProvider({ children }) {
     "JOHN",
   ]);
 
-  const updateCurrentSelectedWord = (newSelectedWord) =>
-  {
-    console.log(newSelectedWord)
-    setCurrentSelectedWord(newSelectedWord)
-    console.log(`hello ${currentSelectedWord}`)
+  const updateCurrentSelectedWord = (newSelectedWord) => {
+    console.log(newSelectedWord);
+    setCurrentSelectedWord(newSelectedWord);
+    console.log(`hello ${currentSelectedWord}`);
   };
   const updateWordsCollection = (newWordsCollection) =>
     setWordsCollection(newWordsCollection);
   const updateSelectedWordInfo = (newSelectedWordInfo) =>
     setSelectedWordInfo(newSelectedWordInfo);
 
-  const wordsContextValue = useMemo(() => ({
-    wordsCollection,
-    updateWordsCollection,
-    currentSelectedWords,
-    currentSelectedWord,
-    updateCurrentSelectedWord,
-    selectedWordInfo,
-    updateSelectedWordInfo,
-  }), [wordsCollection, currentSelectedWords, currentSelectedWord, selectedWordInfo]);
-  
+  const wordsContextValue = useMemo(
+    () => ({
+      wordsCollection,
+      updateWordsCollection,
+      currentSelectedWords,
+      currentSelectedWord,
+      updateCurrentSelectedWord,
+      selectedWordInfo,
+      updateSelectedWordInfo,
+    }),
+    [
+      wordsCollection,
+      currentSelectedWords,
+      currentSelectedWord,
+      selectedWordInfo,
+    ]
+  );
 
   return (
     <WordsContext.Provider value={wordsContextValue}>
@@ -51,4 +58,4 @@ function WordsProvider({ children }) {
   );
 }
 
-export { WordsContext, WordsProvider,};
+export { WordsContext, WordsProvider };
