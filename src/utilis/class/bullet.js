@@ -1,6 +1,7 @@
 class Bullet {
-  constructor(context, x, y, velocity, radius) {
+  constructor(context, canvasWidth, x, y, velocity, radius) {
     this.ctx = context;
+    this.canvasWidth = canvasWidth;
     this.x = x;
     this.y = y;
     this.radius = radius;
@@ -44,7 +45,7 @@ class Bullets {
     this.bullets = this.bullets.filter((bullet) => {
       bullet.update();
       if (
-        (bullet.x + bullet.radius > CANVAS_WIDTH &&
+        (bullet.x + bullet.radius > this.canvasWidth &&
           bullet.x - bullet.radius < 0) ||
         bullet.y - bullet.radius < 0
       ) {
@@ -62,7 +63,4 @@ class Bullets {
   }
 }
 
-export {
-  Bullet,
-  Bullets
-}
+export { Bullet, Bullets };

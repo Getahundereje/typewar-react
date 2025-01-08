@@ -1,4 +1,4 @@
-import { createContext, useState, useMemo } from "react";
+import { createContext, useRef } from "react";
 
 import { Words } from "../../utilis/class/word";
 
@@ -6,10 +6,11 @@ const WordsContext = createContext();
 
 // eslint-disable-next-line react/prop-types
 function WordsProvider({ children }) {
-  const [currentSelectedWords] = useState(new Words());
-  const [currentSelectedWord, setCurrentSelectedWord] = useState(undefined);
-  const [selectedWordInfo, setSelectedWordInfo] = useState(undefined);
-  const [wordsCollection, setWordsCollection] = useState([
+  const { current: currentSelectedCharacter } = useRef(undefined);
+  const { current: currentSelectedWords } = useRef(new Words());
+  const { current: currentSelectedWord } = useRef(undefined);
+  let { current: selectedWordInfo } = useRef({});
+  let { current: wordsCollection } = useRef([
     "GETAHUN",
     "NATI",
     "KALEAB",
@@ -23,33 +24,13 @@ function WordsProvider({ children }) {
     "JOHN",
   ]);
 
-  const updateCurrentSelectedWord = (newSelectedWord) => {
-    console.log(newSelectedWord);
-    setCurrentSelectedWord(newSelectedWord);
-    console.log(`hello ${currentSelectedWord}`);
+  const wordsContextValue = {
+    currentSelectedCharacter,
+    wordsCollection,
+    currentSelectedWords,
+    currentSelectedWord,
+    selectedWordInfo,
   };
-  const updateWordsCollection = (newWordsCollection) =>
-    setWordsCollection(newWordsCollection);
-  const updateSelectedWordInfo = (newSelectedWordInfo) =>
-    setSelectedWordInfo(newSelectedWordInfo);
-
-  const wordsContextValue = useMemo(
-    () => ({
-      wordsCollection,
-      updateWordsCollection,
-      currentSelectedWords,
-      currentSelectedWord,
-      updateCurrentSelectedWord,
-      selectedWordInfo,
-      updateSelectedWordInfo,
-    }),
-    [
-      wordsCollection,
-      currentSelectedWords,
-      currentSelectedWord,
-      selectedWordInfo,
-    ]
-  );
 
   return (
     <WordsContext.Provider value={wordsContextValue}>

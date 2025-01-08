@@ -4,30 +4,38 @@ function generateWordIndex(wordsCollection) {
   return Math.floor(Math.random() * wordsCollection.length);
 }
 
-function spawnWords(numberOfWords, timeInterval, canvasContext, canvas, currentSelectedWords, wordsCollection) {
-  
+function spawnWords(
+  numberOfWords,
+  timeInterval,
+  canvasContext,
+  canvasWidth,
+  canvasHeight,
+  currentSelectedWords,
+  wordsCollection
+) {
   let i = 0;
 
   const stopTimer = setInterval(() => {
     const index = generateWordIndex(wordsCollection);
     const word = wordsCollection[index];
-    
+
     if (word) {
       wordsCollection.splice(index, 1);
 
       const wordLength = canvasContext.measureText(word).width;
-      const xRand = Math.random() * canvas.width;
+      const xRand = Math.random() * canvasWidth;
       const x =
-        xRand > canvas.width - wordLength
-  
-        ? canvas.width - wordLength - 10
+        xRand > canvasWidth - wordLength
+          ? canvasWidth - wordLength - 10
           : xRand < wordLength
           ? wordLength + 10
           : xRand;
-      const y = (Math.random() * canvas.height) / 4 + 20;
+      const y = 20;
 
       const dx = Math.random() - 0.5;
-      currentSelectedWords.add(new Word(word, canvasContext, x, y, dx, 0.5));
+      currentSelectedWords.add(
+        new Word(word, canvasContext, canvasHeight, x, y, dx, 0.5)
+      );
     }
 
     i++;

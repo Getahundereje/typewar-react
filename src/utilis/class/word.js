@@ -1,7 +1,8 @@
 class Word {
-  constructor(word, context, x, y, dx, dy) {
+  constructor(word, context, canvasHeight, x, y, dx, dy) {
     this.word = word;
-    this.ctx = context
+    this.ctx = context;
+    this.canvasHeight = canvasHeight;
     this.x = x;
     this.y = y;
     this.dx = dx;
@@ -9,7 +10,9 @@ class Word {
     this.selectedLetters = "";
     this.notSelectedLetters = word;
     this.collidedLetters = "";
-    this.fontSize = 16;
+    this.collidedLettersColor = "#D6CFB4";
+    this.notSelectedLettersColor = "#FFF574";
+    this.fontSize = 18;
     this.life = 0;
     this.lifeCounter = 0;
   }
@@ -18,13 +21,20 @@ class Word {
     this.lifeCounter++;
     this.draw();
     if (
-      this.x + this.ctx.measureText(this.word).width >= 600 ||
+      this.x +
+        (this.ctx.measureText(this.collidedLetters).width +
+          this.ctx.measureText(this.selectedLetters).width +
+          this.ctx.measureText(this.notSelectedLetters).width) >=
+        600 ||
       this.x <= 0
     ) {
       this.dx = -this.dx;
     }
-    if (this.y - this.ctx.measureText(this.word).actualBoundingBoxAscent <= 0) {
-      this.dy = -this.dy;
+    if (
+      this.y - this.ctx.measureText(this.word).actualBoundingBoxAscent >=
+      this.canvasHeight
+    ) {
+      this.y = this.ctx.measureText(this.word).actualBoundingBoxAscent + 3;
     }
 
     if (this.lifeCounter === 20) {
@@ -49,10 +59,10 @@ class Word {
     this.ctx.shadowOffsetY = 5;
     this.ctx.font = `bold ${this.fontSize}px courier`;
 
-    this.ctx.fillStyle = "#FEF3E2";
+    this.ctx.fillStyle = this.collidedLettersColor;
     this.ctx.fillText(this.collidedLetters, this.x, this.y);
 
-    this.ctx.fillStyle = "#FA812F";
+    this.ctx.fillStyle = this.notSelectedLettersColor;
     this.ctx.fillText(
       this.selectedLetters,
       this.x + this.ctx.measureText(this.collidedLetters).width,
@@ -63,7 +73,7 @@ class Word {
       this.ctx.measureText(this.collidedLetters).width +
       this.ctx.measureText(this.selectedLetters).width;
 
-    this.ctx.fillStyle = "#FA812F";
+    this.ctx.fillStyle = this.notSelectedLettersColor;
     this.ctx.fillText(
       this.notSelectedLetters,
       this.x + selectedLettersWidth,
@@ -98,7 +108,7 @@ class Word {
   }
 
   isVanished() {
-    return this.y >= CANVAS_HEIGHT;
+    return this.y + 3 >= this.canvasHeight;
   }
 
   collisionEffect() {
@@ -186,20 +196,38 @@ class Words {
     })[0];
   }
 
+  isEmpty() {
+    return this.words.length === 0;
+  }
+
   wordIsBellowWall() {
-    let index = undefined;
-    this.words.forEach((word, i) => {
+    let flag = false;
+    this.words.forEach((word) => {
       if (word.isVanished()) {
-        index = i;
+        flag = true;
+        word.y = 20;
       }
     });
-
-    if (index && index !== 0) {
-      this.words.splice(index, 1);
-      return true;
-    }
+    if (flag) return true;
 
     return false;
+  }
+
+  createBonus() {
+    let index = Math.floor(Math.random() * this.words.length);
+    while (
+      this.words[index].selectedLetters ||
+      this.words[index].collidedLetters
+    ) {
+      index = Math.floor(Math.random() * this.words.length);
+    }
+
+    this.words[index].collidedLetters = "⭐";
+    this.words[index].notSelectedLettersColor = "gold";
+  }
+
+  checkBonus(word) {
+    return word.collidedLetters.startsWith("⭐");
   }
 
   handleCollisionWithWord() {
@@ -210,7 +238,4 @@ class Words {
   }
 }
 
-export {
-  Word,
-  Words
-}
+export { Word, Words };
