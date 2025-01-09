@@ -1,5 +1,6 @@
 import { useContext, useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Howl } from "howler";
 
 import { Bullet } from "../../../utilis/class/bullet";
 import Gun from "../../../utilis/class/gun";
@@ -38,10 +39,56 @@ function GamePage() {
   const currenTimeStoper = useRef(undefined);
   const stageNumber = useRef(1);
 
+  const gameSounds = {
+    menu: new Howl({
+      src: ["/assets/game-assets/sound/menu.mp3"],
+      volume: Number.parseFloat(gameState.setting.soundVolume),
+    }),
+    wordCompletion: new Howl({
+      src: ["/assets/game-assets/sound/yay.mp3"],
+      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+    }),
+    bulletShoot: new Howl({
+      src: ["/assets/game-assets/sound/shoot.mp3"],
+      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+    }),
+    collision: new Howl({
+      src: ["/assets/game-assets/sound/collision.mp3"],
+      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+    }),
+    vanishing: new Howl({
+      src: ["/assets/game-assets/sound/vanishing.mp3"],
+      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+    }),
+    error: new Howl({
+      src: ["/assets/game-assets/sound/error.mp3"],
+      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+    }),
+  };
+
   function handleCharactreClick(e, wordsContext) {
     if (e.keyCode >= 65 && e.keyCode <= 90) {
       wordsContext.currentSelectedCharacter = e.key;
     }
+  }
+
+  function reset() {
+    wordsContext.currentSelectedCharacter = undefined;
+    wordsContext.currentSelectedWord = undefined;
+    wordsContext.selectedWordInfo = undefined;
+    wordsContext.wordsCollection = [
+      "GETAHUN",
+      "NATI",
+      "KALEAB",
+      "JO",
+      "EYOB",
+      "HELLO",
+      "GOODBYE",
+      "GOOD",
+      "BAD",
+      "EVIL",
+      "JOHN",
+    ];
   }
 
   function handleGameoverButton(e) {
@@ -49,6 +96,7 @@ function GamePage() {
 
     firstTime.current = true;
     stageNumber.current = 1;
+    reset();
     setGameover(false);
     setEntryStage(true);
     setChanceLeft(10);
@@ -99,6 +147,15 @@ function GamePage() {
       setEntryStage(false);
     }, 3000);
   }
+
+  useEffect(() => {
+    gameSounds.menu.play();
+
+    return () => {
+      gameSounds.menu.stop();
+    };
+  }, []);
+
   useEffect(() => {
     if (entryStage) {
       renderIntroPage();
@@ -131,7 +188,8 @@ function GamePage() {
             canvasWidth,
             canvasHeight,
             wordsContext.currentSelectedWords,
-            wordsContext.wordsCollection
+            wordsContext.wordsCollection,
+            reset
           );
           firstTime.current = false;
           if (gameState.setting.gameMode === "timer") {
@@ -182,6 +240,7 @@ function GamePage() {
               wordsContext.currentSelectedCharacter
             );
 
+            gameSounds.bulletShoot.play();
             bullets.shootBullets(
               new Bullet(
                 ctx,
@@ -206,6 +265,7 @@ function GamePage() {
             }
 
             if (gameState.setting.gameMode !== "practice") {
+              gameSounds.error.play();
               setSuccessiveWordAnswers(0);
               setStyles((styles) => [
                 ...styles,
@@ -243,6 +303,7 @@ function GamePage() {
             },
           ]);
 
+          gameSounds.collision.play();
           setScore((score) => score + 1);
           wordsContext.currentSelectedWord.setCollidedLetter();
           wordsContext.currentSelectedWord.collisionEffect();
@@ -271,6 +332,7 @@ function GamePage() {
                 },
               ]);
             }
+            gameSounds.wordCompletion.play();
             wordsContext.currentSelectedWord = undefined;
 
             if (wordsContext.currentSelectedWords.isEmpty()) {
@@ -284,7 +346,11 @@ function GamePage() {
           }
         }
 
-        if (wordsContext.currentSelectedWords.wordIsBellowWall()) {
+        const vanishedWord =
+          wordsContext.currentSelectedWords.wordIsBellowWall();
+
+        if (vanishedWord) {
+          gameSounds.vanishing.play();
           setChanceLeft((chanceLeft) => chanceLeft - 1);
           setSuccessiveWordAnswers(0);
           setStyles((styles) => [

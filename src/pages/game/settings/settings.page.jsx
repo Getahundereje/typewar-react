@@ -14,7 +14,7 @@ function SettingsPage() {
   const [gameMode, setGameMode] = useState("staged");
   const [diffculty, setDiffculty] = useState("easy");
 
-  const [state, setState] = useSessionStorage(
+  const [gameState, setGameState] = useSessionStorage(
     "gameState",
     userContext.user?.gameState || ""
   );
@@ -22,7 +22,7 @@ function SettingsPage() {
   function handleChange(e) {
     const { name, value } = e.target;
 
-    setState((prevState) => ({
+    setGameState((prevState) => ({
       ...prevState,
       setting: {
         ...prevState.setting,
@@ -32,11 +32,11 @@ function SettingsPage() {
   }
 
   useEffect(() => {
-    setSound(state.setting.soundVolume);
-    setGameSound(state.setting.gameSoundVolume);
-    setGameMode(state.setting.gameMode);
-    setDiffculty(state.setting.difficulty);
-  }, [state]);
+    setSound(gameState.setting.soundVolume);
+    setGameSound(gameState.setting.gameSoundVolume);
+    setGameMode(gameState.setting.gameMode);
+    setDiffculty(gameState.setting.difficulty);
+  }, [gameState]);
 
   return (
     <div className="settings-container">
@@ -48,18 +48,22 @@ function SettingsPage() {
             type="range"
             name="soundVolume"
             min="0"
-            max="100"
+            max="1"
+            step="0.1"
             value={sound}
             onChange={handleChange}
+            key={1}
           />
           <FormSliderInput
             label="Game sound"
             type="range"
             name="gameSoundVolume"
             min="0"
-            max="100"
+            max="1"
+            step="0.1"
             value={gameSound}
             onChange={handleChange}
+            key={2}
           />
           <div className="game-mode">
             <p className="settings-label">Game Mode</p>

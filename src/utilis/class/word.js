@@ -201,29 +201,34 @@ class Words {
   }
 
   wordIsBellowWall() {
-    let flag = false;
+    let vanishedWord = undefined;
     this.words.forEach((word) => {
       if (word.isVanished()) {
-        flag = true;
-        word.y = 20;
+        if (word.collidedLetters.startsWith("⭐")) {
+          word.collidedLetters = word.collidedLetters.replace("⭐", "");
+          word.notSelectedLettersColor = "#FFF574";
+        }
+        vanishedWord = word;
+        if (!word.collidedLetters || !word.selectedLetters) word.y = 20;
       }
     });
-    if (flag) return true;
 
-    return false;
+    return vanishedWord;
   }
 
   createBonus() {
-    let index = Math.floor(Math.random() * this.words.length);
-    while (
-      this.words[index].selectedLetters ||
-      this.words[index].collidedLetters
-    ) {
-      index = Math.floor(Math.random() * this.words.length);
-    }
+    if (this.words.length) {
+      let index = Math.floor(Math.random() * this.words.length);
+      while (
+        this.words[index].selectedLetters ||
+        this.words[index].collidedLetters
+      ) {
+        index = Math.floor(Math.random() * this.words.length);
+      }
 
-    this.words[index].collidedLetters = "⭐";
-    this.words[index].notSelectedLettersColor = "gold";
+      this.words[index].collidedLetters = "⭐";
+      this.words[index].notSelectedLettersColor = "gold";
+    }
   }
 
   checkBonus(word) {

@@ -6,9 +6,9 @@ const WordsContext = createContext();
 
 // eslint-disable-next-line react/prop-types
 function WordsProvider({ children }) {
-  const { current: currentSelectedCharacter } = useRef(undefined);
-  const { current: currentSelectedWords } = useRef(new Words());
-  const { current: currentSelectedWord } = useRef(undefined);
+  let { current: currentSelectedCharacter } = useRef(undefined);
+  let { current: currentSelectedWords } = useRef(new Words());
+  let { current: currentSelectedWord } = useRef(undefined);
   let { current: selectedWordInfo } = useRef({});
   let { current: wordsCollection } = useRef([
     "GETAHUN",

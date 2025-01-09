@@ -11,11 +11,13 @@ function spawnWords(
   canvasWidth,
   canvasHeight,
   currentSelectedWords,
-  wordsCollection
+  wordsCollection,
+  reset
 ) {
   let i = 0;
 
   const stopTimer = setInterval(() => {
+    console.log(wordsCollection);
     const index = generateWordIndex(wordsCollection);
     const word = wordsCollection[index];
 
@@ -26,9 +28,9 @@ function spawnWords(
       const xRand = Math.random() * canvasWidth;
       const x =
         xRand > canvasWidth - wordLength
-          ? canvasWidth - wordLength - 10
+          ? canvasWidth - wordLength - 50
           : xRand < wordLength
-          ? wordLength + 10
+          ? wordLength + 50
           : xRand;
       const y = 20;
 
@@ -42,6 +44,9 @@ function spawnWords(
 
     if (i === numberOfWords) {
       clearInterval(stopTimer);
+      if (wordsCollection.length < numberOfWords) {
+        reset();
+      }
       return;
     }
   }, timeInterval);
