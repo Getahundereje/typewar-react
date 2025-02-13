@@ -22,9 +22,8 @@ class Bullet {
     this.y -= this.velocity.y;
   }
 
-  isCollidedWithWord(wordPosition) {
-    if (this.y < wordPosition.y) return true;
-    return false;
+  isCollidedWithWord(wordRect) {
+    return this.y < wordRect.y + wordRect.height;
   }
 }
 

@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: url("/assets/game-assets/images/menu.png");
+  background-image: url("/assets/game-assets/images/War4.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top;
@@ -19,7 +19,7 @@
   border: 2px solid #b6a6a65d;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #a5bfcc70;
+  background-color: #a5bfcc8a;
   width: 80%;
   height: 70%;
 }
@@ -32,6 +32,8 @@
   text-align: center;
   border-bottom: 1px solid whitesmoke;
   font-family: "Bungee Spice", sans-serif;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .settings-container .card .card-body {

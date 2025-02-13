@@ -1,14 +1,16 @@
 class Word {
   constructor(word, context, canvasHeight, x, y, dx, dy) {
-    this.word = word;
+    this.word = word.toUpperCase();
     this.ctx = context;
     this.canvasHeight = canvasHeight;
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
+    this.width = this.ctx.measureText(this.word).width;
+    this.height = this.ctx.measureText(this.word).actualBoundingBoxAscent;
     this.selectedLetters = "";
-    this.notSelectedLetters = word;
+    this.notSelectedLetters = this.word;
     this.collidedLetters = "";
     this.collidedLettersColor = "#D6CFB4";
     this.notSelectedLettersColor = "#FFF574";
@@ -30,11 +32,8 @@ class Word {
     ) {
       this.dx = -this.dx;
     }
-    if (
-      this.y - this.ctx.measureText(this.word).actualBoundingBoxAscent >=
-      this.canvasHeight
-    ) {
-      this.y = this.ctx.measureText(this.word).actualBoundingBoxAscent + 3;
+    if (this.height >= this.canvasHeight) {
+      this.height + 3;
     }
 
     if (this.lifeCounter === 20) {
@@ -74,6 +73,13 @@ class Word {
       this.ctx.measureText(this.selectedLetters).width;
 
     this.ctx.fillStyle = this.notSelectedLettersColor;
+    this.ctx.strokeStyle = "red";
+    this.ctx.lineWidth = 5;
+    this.ctx.strokeText(
+      this.notSelectedLetters,
+      this.x + selectedLettersWidth,
+      this.y
+    );
     this.ctx.fillText(
       this.notSelectedLetters,
       this.x + selectedLettersWidth,
@@ -122,41 +128,48 @@ class Word {
   getWordRect() {
     return {
       x: this.x,
-      y: this.y - this.ctx.measureText(this.word).actualBoundingBoxAscent,
-      width: this.ctx.measureText(this.word).width,
-      height: this.ctx.measureText(this.word).actualBoundingBoxAscent,
+      y: this.y - this.height,
+      width: this.width,
+      height: this.height,
     };
   }
 
-  checkCollitiondWithWord(word) {
-    const { x, y, width, height } = this.getWordRect();
-    const {
-      x: otherX,
-      y: otherY,
-      width: otherWidth,
-      height: otherHeght,
-    } = word.getWordRect();
-
-    if (
-      x < otherX + otherWidth &&
-      x + width > otherX &&
-      y + height > otherY &&
-      y < otherHeght + otherY
-    ) {
-      if (y < otherY) {
-        this.y += 3;
-        this.dx += this.dx * 0.1;
-
-        word.dx -= word.dx * 0.1;
-        word.y -= 3;
-      } else {
-        this.y -= 3;
-        this.dx -= this.dx * 0.1;
-
-        word.dx += word.dx * 0.1;
-        word.y += 3;
+  checkCollitiondWithWords(words) {
+    words.forEach((word) => {
+      if (this.isEqual(word)) {
+        return;
       }
-    }
+
+      const { x, y, width, height } = this.getWordRect();
+      const {
+        x: otherX,
+        y: otherY,
+        width: otherWidth,
+        height: otherHeght,
+      } = word.getWordRect();
+
+      if (
+        x < otherX + otherWidth &&
+        x + width > otherX &&
+        y + height > otherY &&
+        y < otherHeght + otherY
+      ) {
+        this.dx = -this.dx;
+        // if (y < otherY) {
+        //   this.y += 3;
+        //   this.dx += this.dx * 0.1;
+
+        //   word.dx -= word.dx * 0.1;
+        //   word.y -= 3;
+        // } else {
+        //   this.y -= 3;
+        //   this.dx -= this.dx * 0.1;
+
+        //   word.dx += word.dx * 0.1;
+        //   word.y += 3;
+        // }
+      }
+    });
   }
 
   isEqual(otherWord) {
@@ -186,6 +199,7 @@ class Words {
 
   update() {
     this.words.forEach((word) => {
+      word.checkCollitiondWithWords(this.words);
       word.update();
     });
   }
@@ -201,44 +215,36 @@ class Words {
   }
 
   wordIsBellowWall() {
-    let vanishedWord = undefined;
+    let vanishedWords = [];
     this.words.forEach((word) => {
       if (word.isVanished()) {
-        if (word.collidedLetters.startsWith("⭐")) {
-          word.collidedLetters = word.collidedLetters.replace("⭐", "");
+        if (word.collidedLetters.includes("⭐")) {
+          word.collidedLetters = word.collidedLetters.substring(1);
           word.notSelectedLettersColor = "#FFF574";
         }
-        vanishedWord = word;
+        vanishedWords.push(word);
         if (!word.collidedLetters || !word.selectedLetters) word.y = 20;
       }
     });
-
-    return vanishedWord;
+    return vanishedWords;
   }
 
   createBonus() {
-    if (this.words.length) {
-      let index = Math.floor(Math.random() * this.words.length);
-      while (
-        this.words[index].selectedLetters ||
-        this.words[index].collidedLetters
-      ) {
-        index = Math.floor(Math.random() * this.words.length);
-      }
-
-      this.words[index].collidedLetters = "⭐";
-      this.words[index].notSelectedLettersColor = "gold";
-    }
+    this.words[this.words.length - 1].collidedLetters = "⭐";
+    this.words[this.words.length - 1].notSelectedLettersColor = "gold";
   }
 
-  checkBonus(word) {
+  isBonus(word) {
     return word.collidedLetters.startsWith("⭐");
   }
 
-  handleCollisionWithWord() {
-    this.words.forEach((word, i) => {
-      if (i === this.words.length - 1) return;
-      word.checkCollitiondWithWord(this.words[i]);
+  clear() {
+    this.words.splice(0);
+  }
+
+  handleCollisionWithWords() {
+    this.words.forEach((word) => {
+      word.checkCollitiondWithWord(this.words);
     });
   }
 }

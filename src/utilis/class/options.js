@@ -23,3 +23,5 @@ class Options {
     else return 1000;
   }
 }
+
+export default Options;

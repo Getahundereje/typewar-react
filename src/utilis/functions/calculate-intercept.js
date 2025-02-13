@@ -31,7 +31,7 @@ function calculateIntercept(target, shooter, bulletSpeed) {
   const bulletVy = (interceptY - shooter.y) / time;
 
   return {
-    velocity: { vx: bulletVx * 2, vy: bulletVy * 2 },
+    velocity: { vx: bulletVx * 1.3, vy: bulletVy * 1.5 },
     position: { x: interceptX, y: interceptY },
   };
 }

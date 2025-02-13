@@ -1,29 +1,29 @@
 .form-button {
-    background-color: #7696ff9c;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Helvetica;
-    font-size: 18px;
-    font-weight: 600;
-    width: 100%;
-    height: 2.5rem;
-    margin-bottom: 20px;
-    padding: auto 0;
-    cursor: pointer;
-  }
-  
+  background-color: #7696ff9c;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Helvetica;
+  font-size: 18px;
+  font-weight: 600;
+  width: 100%;
+  height: 40px;
+  margin-bottom: 20px;
+  padding: auto 0;
+  cursor: pointer;
+}
+
 .form-button:hover {
-    background-color: #7695ff;
+  background-color: #7695ff;
 }
 
 .alternative-options-button {
-    width: 40px;
-    height: 70%;
-    cursor: pointer;
+  width: 40px;
+  height: 70%;
+  cursor: pointer;
 }
 
 .alternative-options-button img {
-    height: 100%;
+  height: 100%;
 }

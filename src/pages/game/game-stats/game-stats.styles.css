@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: url("/assets/game-assets/images/menu.png");
+  background-image: url("/assets/game-assets/images/War4.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top;
@@ -17,12 +17,14 @@
 
 .highscore-menu .card {
   border: 2px solid #b6a6a65d;
+  border-top: 0;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #a5bfcc70;
+  background-color: #a5bfcca9;
   width: 80%;
-  height: fit-content;
+  height: 100%;
 }
+
 .highscore-menu .card .card-header {
   background-color: #493628;
   padding: 15px;
@@ -71,8 +73,11 @@
   justify-content: space-between;
   align-items: center;
   width: 260px;
-  border-top: 1px solid #f4edd3;
   border-bottom: 1px solid #f4edd3;
+}
+
+.highscore-value div:last-child {
+  border: none;
 }
 
 .type {

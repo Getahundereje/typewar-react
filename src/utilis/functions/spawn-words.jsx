@@ -1,55 +1,74 @@
 import { Word } from "../class/word";
 
+const wordsEntrancePoints = [100, 220, 340, 460];
+const wordsEntrancePointsAccessOrder = [0, 2, 1, 3];
+let currentEntrancePoint = 0;
+
 function generateWordIndex(wordsCollection) {
   return Math.floor(Math.random() * wordsCollection.length);
 }
 
 function spawnWords(
-  numberOfWords,
+  numberOfWordsToSpawn,
   timeInterval,
   canvasContext,
-  canvasWidth,
   canvasHeight,
-  currentSelectedWords,
+  selectedWords,
   wordsCollection,
-  reset
+  isBonus = false
 ) {
-  let i = 0;
+  let currentItration = 1;
+  let numberOfWordsToSpawnOnce = Math.ceil(numberOfWordsToSpawn * 0.25);
+  const totalItration = Math.ceil(
+    numberOfWordsToSpawn / numberOfWordsToSpawnOnce
+  );
 
-  const stopTimer = setInterval(() => {
-    console.log(wordsCollection);
-    const index = generateWordIndex(wordsCollection);
-    const word = wordsCollection[index];
+  function spawnWord() {
+    for (let i = 0; i < numberOfWordsToSpawnOnce; i++) {
+      const index = generateWordIndex(wordsCollection);
 
-    if (word) {
-      wordsCollection.splice(index, 1);
+      const word = wordsCollection[index];
 
-      const wordLength = canvasContext.measureText(word).width;
-      const xRand = Math.random() * canvasWidth;
-      const x =
-        xRand > canvasWidth - wordLength
-          ? canvasWidth - wordLength - 50
-          : xRand < wordLength
-          ? wordLength + 50
-          : xRand;
-      const y = 20;
+      if (word) {
+        wordsCollection.splice(index, 1);
 
-      const dx = Math.random() - 0.5;
-      currentSelectedWords.add(
-        new Word(word, canvasContext, canvasHeight, x, y, dx, 0.5)
-      );
-    }
+        const x =
+          wordsEntrancePoints[
+            wordsEntrancePointsAccessOrder[currentEntrancePoint]
+          ];
+        const y = 80;
+        currentEntrancePoint++;
+        currentEntrancePoint =
+          currentEntrancePoint % wordsEntrancePoints.length;
 
-    i++;
-
-    if (i === numberOfWords) {
-      clearInterval(stopTimer);
-      if (wordsCollection.length < numberOfWords) {
-        reset();
+        const dx = Math.random() - 0.5;
+        selectedWords.add(
+          new Word(word, canvasContext, canvasHeight, x, y, dx, 0.5)
+        );
+        isBonus && selectedWords.createBonus();
       }
-      return;
     }
-  }, timeInterval);
+  }
+
+  spawnWord();
+
+  if (numberOfWordsToSpawn > 1) {
+    const stopTimer = setInterval(() => {
+      if (currentItration === totalItration) {
+        clearInterval(stopTimer);
+        return;
+      }
+
+      if (currentItration === totalItration - 1)
+        numberOfWordsToSpawnOnce =
+          numberOfWordsToSpawn % numberOfWordsToSpawnOnce ||
+          numberOfWordsToSpawnOnce;
+
+      spawnWord();
+
+      currentItration++;
+    }, timeInterval);
+  }
 }
 
 export default spawnWords;
