@@ -1,4 +1,15 @@
 * {
-  padding:0;
+  padding: 0;
   margin: 0;
+}
+
+@font-face {
+  font-family: "Robus";
+  src: url("/assets/fonts/Robus.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  background-color: #1C325B;
 }

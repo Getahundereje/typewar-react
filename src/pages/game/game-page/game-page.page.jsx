@@ -1,4 +1,4 @@
-import { useContext, useRef, useEffect, useState } from "react";
+import { useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Howl } from "howler";
 import axios from "axios";
@@ -14,6 +14,11 @@ import calculateIntercept from "../../../utilis/functions/calculate-intercept";
 import useSessionStorage from "../../../hooks/useSessionStorage.jsx";
 
 import LoadingSpinner from "../../../components/loading-spinner/loading-spinner.component";
+import GameOver from "../../../components/game-over/game-over.component.jsx";
+import PauseMenu from "../../../components/pause-menu/pause-menu.component.jsx";
+import StatsBoard from "../../../components/stats-board/stats-board.component.jsx";
+import useGameState from "../../../hooks/useGameStates.jsx";
+import updatePlayerSetting from "../../../utilis/functions/updatePlayerState.js";
 
 import "./game-page.styles.css";
 
@@ -36,26 +41,41 @@ function GamePage() {
   const wordsContext = useContext(WordsContext);
   const { bullets } = useContext(BulletsContext);
 
-  const [gameState] = useSessionStorage(
-    "gameState",
-    userContext.user?.gameState || ""
+  const [playerState, setPlayerState] = useSessionStorage(
+    "playerState",
+    userContext.user?.playerState || ""
   );
 
-  const [score, setScore] = useState(0);
-  const [chanceLeft, setChanceLeft] = useState(10);
-  const [currentTime, setCurrentTime] = useState({});
-  const [entryStage, setEntryStage] = useState(true);
-  const [gameover, setGameover] = useState(false);
+  const {
+    score,
+    setScore,
+    chanceLeft,
+    setChanceLeft,
+    currentTime,
+    setCurrentTime,
+    entryStage,
+    setEntryStage,
+    pauseGame,
+    setPauseGame,
+    gameover,
+    setGameover,
+    setContinueGame,
+
+    // Refs
+    firstTime,
+    currenTimeStoper,
+    successiveWordAnswers,
+    stageNumber,
+    currentStageNumberOfWords,
+    currentStageNotRenderedWords,
+    currentStageRemainingWords,
+    falseShoot,
+    trueShoot,
+
+    resetGameStates,
+  } = useGameState();
 
   const canvasRef = useRef();
-  const successiveWordAnswers = useRef(0);
-  const currenTimeStoper = useRef(undefined);
-  const stageNumber = useRef(1);
-  const currentStageNumberOfWords = useRef(5);
-  const currentStageRemainingWords = useRef(currentStageNumberOfWords.current);
-  const falseShoot = useRef(0);
-  const trueShoot = useRef(0);
-  let firstTime = useRef(true);
   let { current: styles } = useRef([]);
 
   const maxNumberOfWordsOnScreen = 7;
@@ -63,27 +83,31 @@ function GamePage() {
   const gameSounds = {
     menu: new Howl({
       src: ["/assets/game-assets/sound/menu.mp3"],
-      volume: Number.parseFloat(gameState.setting.soundVolume),
+      volume: Number.parseFloat(playerState.setting.soundVolume),
     }),
     wordCompletion: new Howl({
       src: ["/assets/game-assets/sound/yay.mp3"],
-      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
     }),
     bulletShoot: new Howl({
       src: ["/assets/game-assets/sound/shoot.mp3"],
-      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
     }),
     collision: new Howl({
       src: ["/assets/game-assets/sound/collision.mp3"],
-      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
     }),
     vanishing: new Howl({
       src: ["/assets/game-assets/sound/vanishing.mp3"],
-      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
     }),
     error: new Howl({
       src: ["/assets/game-assets/sound/error.mp3"],
-      volume: Number.parseFloat(gameState.setting.gameSoundVolume),
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+    }),
+    gameover: new Howl({
+      src: ["/assets/game-assets/sound/gameOver.mp3"],
+      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
     }),
   };
 
@@ -91,32 +115,44 @@ function GamePage() {
     if (e.keyCode >= 65 && e.keyCode <= 90) {
       wordsContext.currentSelectedCharacter = e.key;
     }
+
+    if (e.code === "Escape") {
+      setContinueGame(true);
+      setPauseGame(true);
+      clearInterval(currenTimeStoper.current);
+    }
+  }
+
+  function resetGame() {
+    wordsContext.reset();
+    resetGameStates();
+    styles = [];
   }
 
   function handleGameoverButton(e) {
     e.preventDefault();
 
-    firstTime.current = true;
-    stageNumber.current = 1;
-    successiveWordAnswers.current = 0;
-    currentStageNumberOfWords.current = 5;
-    currentStageRemainingWords.current = currentStageNumberOfWords.current;
-    falseShoot.current = 0;
-    trueShoot.current = 0;
-    styles = [];
-
-    wordsContext.currentSelectedCharacter = "";
-    wordsContext.currentSelectedWord = undefined;
-    wordsContext.selectedWordInfo = {};
-    wordsContext.currentSelectedWords.clear();
-    wordsContext.notSelectedWords = [...wordsContext.wordsCollection];
-    setGameover(false);
-    setEntryStage(true);
-    setChanceLeft(10);
-    setScore(0);
-    clearInterval(currenTimeStoper.current);
-
+    resetGame();
     if (e.target.name === "menu") {
+      navigate("/game/homepage");
+    }
+  }
+
+  function handlePauseGameButton(e) {
+    if (e.target.name === "resume") {
+      setContinueGame(false);
+      setPauseGame(false);
+    } else if (e.target.name === "restart") {
+      resetGame();
+    } else if (e.target.name === "options") {
+      navigate("/game/settings", {
+        state: { disabled: true },
+      });
+    } else if (e.target.name === "menu") {
+      setPauseGame(false);
+      navigate("/game/homepage");
+    } else if (e.target.name === "quit") {
+      resetGame();
       navigate("/game/homepage");
     }
   }
@@ -172,7 +208,6 @@ function GamePage() {
       });
       const { data } = response;
       wordsContext.setWordsCollection(data.data.words);
-      console.log(data.data.words);
     } catch (error) {
       console.log(error);
     }
@@ -188,23 +223,56 @@ function GamePage() {
     if (!wordsContext.wordsCollection.length) {
       getWords();
     }
-  }, []);
 
-  useEffect(() => {
-    if (wordsContext.wordsCollection.length) {
+    if (entryStage) {
       gameSounds.menu.play();
-      window.onpopstate = handleGameoverButton;
     }
 
     return () => {
       gameSounds.menu.stop();
-      window.onpopstate = null;
-      wordsContext.setWordsCollection([]);
+      resetGameStates();
     };
   }, []);
 
   useEffect(() => {
-    if (wordsContext.wordsCollection.length) {
+    if (
+      playerState.highscore.singlePlayer[playerState.setting.gameMode][
+        playerState.setting.difficulty
+      ] < score
+    ) {
+      updatePlayerSetting({
+        ...playerState,
+        highscore: {
+          ...playerState.highscore,
+          singlePlayer: {
+            ...playerState.highscore.singlePlayer,
+            [playerState.setting.gameMode]: {
+              [playerState.setting.difficulty]: score,
+            },
+          },
+        },
+      });
+
+      setPlayerState({
+        ...playerState,
+        highscore: {
+          ...playerState.highscore,
+          singlePlayer: {
+            ...playerState.highscore.singlePlayer,
+            [playerState.setting.gameMode]: {
+              ...playerState.highscore.singlePlayer[
+                playerState.setting.gameMode
+              ],
+              [playerState.setting.difficulty]: score,
+            },
+          },
+        },
+      });
+    }
+  }, [pauseGame, gameover]);
+
+  useEffect(() => {
+    if (wordsContext.wordsCollection.length && !pauseGame) {
       if (entryStage) {
         renderIntroPage();
       } else if (!entryStage && !gameover) {
@@ -226,20 +294,24 @@ function GamePage() {
         document.body.addEventListener("keydown", handleCharactreClickWrapper);
 
         function animate() {
-          animationFrameId = requestAnimationFrame(animate);
           ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
           new Gun(ctx, canvasWidth / 2 - 20, canvasHeight - 20).draw();
 
           if (firstTime.current) {
+            currentStageNotRenderedWords.current =
+              currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
+                ? 0
+                : currentStageNumberOfWords.current - maxNumberOfWordsOnScreen;
+
             spawnWords(
-              gameState.setting.gameMode === "timer"
+              playerState.setting.gameMode === "timer"
                 ? maxNumberOfWordsOnScreen
                 : currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
                 ? currentStageNumberOfWords.current
                 : maxNumberOfWordsOnScreen,
-              gameSettingsProperty[gameState.setting.gameMode][
-                gameState.setting.difficulty
+              gameSettingsProperty[playerState.setting.gameMode][
+                playerState.setting.difficulty
               ],
               ctx,
               canvasHeight,
@@ -247,7 +319,7 @@ function GamePage() {
               wordsContext.notSelectedWords
             );
             firstTime.current = false;
-            if (gameState.setting.gameMode === "timer") {
+            if (playerState.setting.gameMode === "timer") {
               timer(
                 5,
                 {
@@ -259,25 +331,7 @@ function GamePage() {
             }
           }
 
-          if (
-            (gameState.setting.gameMode === "timer" &&
-              wordsContext.currentSelectedWords.length <
-                maxNumberOfWordsOnScreen) ||
-            (currentStageNumberOfWords > maxNumberOfWordsOnScreen &&
-              wordsContext.currentSelectedWords.length <
-                maxNumberOfWordsOnScreen)
-          ) {
-            spawnWords(
-              1,
-              gameSettingsProperty[gameState.setting.gameMode][
-                gameState.setting.difficulty
-              ],
-              ctx,
-              canvasHeight,
-              wordsContext.currentSelectedWords,
-              wordsContext.notSelectedWords
-            );
-          }
+          wordsContext.currentSelectedWords.update(ctx);
 
           if (wordsContext.currentSelectedCharacter) {
             if (!wordsContext.currentSelectedWord) {
@@ -327,11 +381,11 @@ function GamePage() {
 
               trueShoot.current += 1;
             } else {
-              if (gameState.setting.gameMode === "staged") {
+              if (playerState.setting.gameMode === "staged") {
                 setChanceLeft((chanceLeft) =>
                   chanceLeft ? chanceLeft - 1 : 0
                 );
-              } else if (gameState.setting.gameMode === "timer") {
+              } else if (playerState.setting.gameMode === "timer") {
                 if (
                   Number.parseInt(currentTime.sec) > 10 ||
                   currentTime.min > 0
@@ -341,12 +395,12 @@ function GamePage() {
                 } else setGameover(true);
               }
 
-              if (gameState.setting.gameMode !== "practice") {
+              if (playerState.setting.gameMode !== "practice") {
                 gameSounds.error.play();
                 successiveWordAnswers.current = 0;
                 styles.push({
                   type: "deduction",
-                  value: gameState.setting.gameMode === "timer" ? 10 : 1,
+                  value: playerState.setting.gameMode === "timer" ? 10 : 1,
                   style: {
                     top: `${50}px`,
                     left: `${canvasWidth - 100}px`,
@@ -358,8 +412,6 @@ function GamePage() {
             }
             wordsContext.currentSelectedCharacter = undefined;
           }
-
-          wordsContext.currentSelectedWords.update();
 
           if (
             bullets
@@ -404,14 +456,40 @@ function GamePage() {
                 currentStageRemainingWords.current++;
                 spawnWords(
                   1,
-                  gameSettingsProperty[gameState.setting.gameMode][
-                    gameState.setting.difficulty
+                  gameSettingsProperty[playerState.setting.gameMode][
+                    playerState.setting.difficulty
                   ],
                   ctx,
                   canvasHeight,
                   wordsContext.currentSelectedWords,
                   wordsContext.notSelectedWords,
                   true
+                );
+              }
+
+              if (
+                (playerState.setting.gameMode === "timer" &&
+                  wordsContext.currentSelectedWords.getLength() <
+                    maxNumberOfWordsOnScreen) ||
+                (currentStageNumberOfWords.current > maxNumberOfWordsOnScreen &&
+                  wordsContext.currentSelectedWords.getLength() <
+                    maxNumberOfWordsOnScreen &&
+                  currentStageNotRenderedWords.current)
+              ) {
+                console.log(
+                  "spawn-words",
+                  currentStageNotRenderedWords.current
+                );
+                currentStageNotRenderedWords.current--;
+                spawnWords(
+                  1,
+                  gameSettingsProperty[playerState.setting.gameMode][
+                    playerState.setting.difficulty
+                  ],
+                  ctx,
+                  canvasHeight,
+                  wordsContext.currentSelectedWords,
+                  wordsContext.notSelectedWords
                 );
               }
             } else {
@@ -428,7 +506,7 @@ function GamePage() {
 
             // check if a stage is completed
             if (
-              gameState.setting.gameMode === "staged" &&
+              playerState.setting.gameMode === "staged" &&
               currentStageRemainingWords.current === 0
             ) {
               firstTime.current = true;
@@ -451,17 +529,26 @@ function GamePage() {
           if (vanishedWords.length) {
             gameSounds.vanishing.play();
             successiveWordAnswers.current = 0;
-            vanishedWords.forEach(() => {
-              if (gameState.setting.gameMode === "staged") {
+            vanishedWords.forEach((word) => {
+              if (playerState.setting.gameMode === "staged") {
                 setChanceLeft((chanceLeft) => chanceLeft - 1);
-              } else if (gameState.setting.gameMode === "timer") {
+              } else if (playerState.setting.gameMode === "timer") {
                 clearInterval(currenTimeStoper.current);
                 timer(5, currentTime, 10);
               }
 
+              if (
+                wordsContext.currentSelectedWord &&
+                word.isEqual(wordsContext.currentSelectedWord)
+              ) {
+                word.reset();
+                wordsContext.currentSelectedWord = undefined;
+                wordsContext.currentSelectedCharacter = undefined;
+              }
+
               styles.push({
                 type: "deduction",
-                value: gameState.setting.gameMode === "timer" ? 10 : 1,
+                value: playerState.setting.gameMode === "timer" ? 10 : 1,
                 style: {
                   top: `${50}px`,
                   left: `${canvasWidth - 100}px`,
@@ -470,8 +557,12 @@ function GamePage() {
             });
           }
 
-          if (chanceLeft === 0) setGameover(true);
+          if (chanceLeft === 0) {
+            setGameover(true);
+            gameSounds.gameover.play();
+          }
           bullets.update();
+          animationFrameId = requestAnimationFrame(animate);
         }
 
         animate();
@@ -482,15 +573,13 @@ function GamePage() {
       }
     }
   }, [
-    bullets,
     wordsContext,
-    wordsContext.wordsCollection,
     currentTime,
     entryStage,
     gameover,
     chanceLeft,
-    successiveWordAnswers,
-    gameState,
+    playerState,
+    pauseGame,
   ]);
 
   return (
@@ -499,86 +588,49 @@ function GamePage() {
         entryStage ? (
           <div className="entry-page">
             <p>
-              {gameState.setting.gameMode === "staged"
+              {playerState.setting.gameMode === "staged"
                 ? `STAGE ${stageNumber.current}`
                 : "READY"}
             </p>
           </div>
+        ) : pauseGame ? (
+          <PauseMenu handlePauseGameButton={handlePauseGameButton} />
         ) : gameover ? (
-          <div className="game-over-screen">
-            <p className="game-over-screen-title">
-              {gameState.setting.gameMode === "staged"
-                ? "GAME OVER"
-                : "TIME OUT"}
-            </p>
-            <div className="game-over-screen-stats">
-              <div>
-                <span className="type">Score</span>
-                <span className="value">{score}</span>
-              </div>
-              <div>
-                <span className="type">Highscore</span>
-                <span className="value">
-                  {
-                    gameState.highscore.singlePlayer[
-                      gameState.setting.gameMode
-                    ][gameState.setting.difficulty]
-                  }
-                </span>
-              </div>
-              <div>
-                <span className="type">Accuracy</span>
-                <span className="value">
-                  {(
-                    Math.fround(
-                      trueShoot.current /
-                        (trueShoot.current + falseShoot.current)
-                    ) * 100
-                  ).toFixed(1) + "%"}
-                </span>
-              </div>
-            </div>
-            <div className="game-over-screen-buttons">
-              <a
-                href="#"
-                className="game-over-screen-button"
-                name="try-again"
-                onClick={handleGameoverButton}
-              >
-                Try again
-              </a>
-              <a
-                href="#"
-                className="game-over-screen-button"
-                name="menu"
-                onClick={handleGameoverButton}
-              >
-                Go to menu
-              </a>
-            </div>
-          </div>
+          <GameOver
+            gameMode={playerState.setting.gameMode}
+            score={score}
+            highscore={
+              playerState.highscore.singlePlayer[playerState.setting.gameMode][
+                playerState.setting.difficulty
+              ]
+            }
+            handleGameoverButton={handleGameoverButton}
+            accuracy={
+              (
+                Math.fround(
+                  trueShoot.current / (trueShoot.current + falseShoot.current)
+                ) * 100
+              ).toFixed(1) + "%"
+            }
+          />
         ) : (
           <>
-            {gameState.setting.gameMode === "practice" ? (
+            {playerState.setting.gameMode === "practice" ? (
               ""
             ) : (
-              <div className="game-page-states-board">
-                <p className="stats">SCORE {score}</p>
-                {gameState.setting.gameMode === "staged" ? (
-                  <p className="stats">CHANCE LEFT {chanceLeft}</p>
-                ) : (
-                  <p className="stats">
-                    TIME LEFT {`${currentTime.min}:${currentTime.sec}`}
-                  </p>
-                )}
-              </div>
+              <StatsBoard
+                score={score}
+                gameMode={playerState.setting.gameMode}
+                chanceLeft={chanceLeft}
+                currentTime={currentTime}
+              />
             )}
-            <canvas ref={canvasRef} className="game-canvas" />
           </>
         )
       ) : (
         <LoadingSpinner />
       )}
+      <canvas ref={canvasRef} className="game-canvas" />
       {styles.length
         ? styles.map((style, i) => {
             return (

@@ -12,6 +12,7 @@ import { BulletsProvider } from "./contexts/bullets/bullets.context";
 import { UserProvider } from "./contexts/user/user.context";
 
 import "./App.css";
+import HelpPage from "./pages/game/game-help/game-help.page";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
                 <Route path="gamePage" element={<GamePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="stats" element={<StatsPage />} />
+                <Route path="help" element={<HelpPage />} />
               </Route>
             </Routes>
           </WordsProvider>

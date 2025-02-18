@@ -1,14 +1,20 @@
 import { useContext, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 import FormSliderInput from "../../../components/form-slider/form-slider.component";
 import RadioButton from "../../../components/custom-radio-button/custom-radio-button.component";
 import { UserContext } from "../../../contexts/user/user.context";
 import useSessionStorage from "../../../hooks/useSessionStorage";
+import useGameState from "../../../hooks/useGameStates";
+import { WordsContext } from "../../../contexts/words/words.context";
+import updatePlayerSetting from "../../../utilis/functions/updatePlayerState";
 
 import "./settings.styles.css";
-import axios from "axios";
 
 function SettingsPage() {
+  const location = useLocation();
+  const { disabled } = location.state || false;
+
   const userContext = useContext(UserContext);
   const [sound, setSound] = useState("0");
   const [gameSound, setGameSound] = useState("0");
@@ -16,62 +22,49 @@ function SettingsPage() {
   const [diffculty, setDiffculty] = useState("easy");
   const stateUpdated = useRef(false);
 
-  const [gameState, setGameState] = useSessionStorage(
-    "gameState",
-    userContext.user?.gameState || ""
+  const [playerState, setPlayerState] = useSessionStorage(
+    "playerState",
+    userContext.user?.playerState || ""
   );
 
-  const gameStateCopy = useRef(gameState);
+  const wordsContext = useContext(WordsContext);
+
+  const { setContinueGame, resetGameStates } = useGameState();
+
+  const playerStateCopy = useRef({});
 
   function handleChange(e) {
     const { name, value } = e.target;
-    console.log(name, value);
 
-    setGameState((prevState) => ({
-      ...prevState,
-      setting: {
-        ...prevState.setting,
-        [name]: value,
-      },
-    }));
     stateUpdated.current = true;
-
-    gameStateCopy.current = {
-      ...gameState,
+    playerStateCopy.current = {
+      ...playerState,
       setting: {
-        ...gameState.setting,
+        ...playerState.setting,
         [name]: value,
       },
     };
+
+    if (Object.keys(playerState.setting).includes(name)) {
+      setContinueGame(false);
+      wordsContext.reset();
+      resetGameStates();
+    }
+
+    setPlayerState(playerStateCopy.current);
   }
 
   useEffect(() => {
-    setSound(gameState.setting.soundVolume);
-    setGameSound(gameState.setting.gameSoundVolume);
-    setGameMode(gameState.setting.gameMode);
-    setDiffculty(gameState.setting.difficulty);
-  }, [gameState]);
-
-  async function updateSetting() {
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/states",
-        gameStateCopy.current,
-        {
-          withCredentials: true,
-        }
-      );
-      const { data } = response;
-      console.log(data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+    setSound(playerState.setting.soundVolume);
+    setGameSound(playerState.setting.gameSoundVolume);
+    setGameMode(playerState.setting.gameMode);
+    setDiffculty(playerState.setting.difficulty);
+  }, [playerState]);
 
   useEffect(() => {
     return () => {
       if (stateUpdated.current) {
-        updateSetting();
+        updatePlayerSetting(playerStateCopy.current);
       }
     };
   }, []);
@@ -116,6 +109,7 @@ function SettingsPage() {
                 value="staged"
                 checked={gameMode === "staged"}
                 onChange={handleChange}
+                disabled={disabled}
               />
               <RadioButton
                 label="Timer"
@@ -125,6 +119,7 @@ function SettingsPage() {
                 value="timer"
                 checked={gameMode === "timer"}
                 onChange={handleChange}
+                disabled={disabled}
               />
               <RadioButton
                 label="Practice"
@@ -134,6 +129,7 @@ function SettingsPage() {
                 value="practice"
                 checked={gameMode === "practice"}
                 onChange={handleChange}
+                disabled={disabled}
               />
             </div>
           </div>
@@ -148,6 +144,7 @@ function SettingsPage() {
                 value="easy"
                 checked={diffculty === "easy"}
                 onChange={handleChange}
+                disabled={disabled}
               />
               <RadioButton
                 label="Normal"
@@ -157,6 +154,7 @@ function SettingsPage() {
                 value="normal"
                 checked={diffculty === "normal"}
                 onChange={handleChange}
+                disabled={disabled}
               />
               <RadioButton
                 label="Hard"
@@ -166,6 +164,7 @@ function SettingsPage() {
                 value="hard"
                 checked={diffculty === "hard"}
                 onChange={handleChange}
+                disabled={disabled}
               />
             </div>
           </div>

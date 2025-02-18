@@ -1,0 +1,41 @@
+.helps {
+  width: 100%;
+}
+
+.helps-type {
+  background-color: #4936287c;
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  font-family: "Bungee Spice", sans-serif;
+  font-size: 24px;
+}
+
+.helps div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid #f4edd3;
+  margin: 10px 0;
+  padding: 0 2px;
+  background-color: #eae2c6;
+}
+
+.helps div:last-child {
+  border: none;
+}
+
+.helps .type {
+  font-family: "Rajdhani", serif;
+  font-size: 18px;
+  color: black;
+  display: inline-block;
+  margin: 2px;
+}
+
+.helps .value {
+  font-family: "Rajdhani", serif;
+  font-size: 18px;
+  color: black;
+}

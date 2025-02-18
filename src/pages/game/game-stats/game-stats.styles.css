@@ -17,16 +17,16 @@
 
 .highscore-menu .card {
   border: 2px solid #b6a6a65d;
-  border-top: 0;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: #a5bfcca9;
   width: 80%;
-  height: 100%;
+  height: fit-content;
 }
 
 .highscore-menu .card .card-header {
   background-color: #493628;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
   font-size: 30px;
@@ -82,6 +82,7 @@
 
 .type {
   font-family: "Lobster", serif;
+  font-size: 18px;
   color: #001a6e;
   display: inline-block;
   margin: 2px;
@@ -89,5 +90,6 @@
 
 .value {
   font-family: "Lobster", serif;
+  font-size: 18px;
   color: #001a6e;
 }

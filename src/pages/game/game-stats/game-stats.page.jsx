@@ -8,8 +8,8 @@ function StatsPage() {
   const userContext = useContext(UserContext);
 
   const [state] = useSessionStorage(
-    "gameState",
-    userContext.user?.gameState || ""
+    "playerState",
+    userContext.user?.playerState || ""
   );
 
   return (
@@ -25,19 +25,19 @@ function StatsPage() {
                 <div>
                   <span className="type">Easy</span>
                   <span className="value easy">
-                    {state.highscore.singlePlayer.staged.easy}
+                    {state.highscore?.singlePlayer.staged.easy}
                   </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
                   <span className="value normal">
-                    {state.highscore.singlePlayer.staged.normal}
+                    {state.highscore?.singlePlayer.staged.normal}
                   </span>
                 </div>
                 <div>
                   <span className="type">Hard</span>
                   <span className="value difficult">
-                    {state.highscore.singlePlayer.staged.hard}
+                    {state.highscore?.singlePlayer.staged.hard}
                   </span>
                 </div>
               </div>
@@ -46,19 +46,19 @@ function StatsPage() {
                 <div>
                   <span className="type">Easy</span>
                   <span className="value easy">
-                    {state.highscore.singlePlayer.timer.easy}
+                    {state.highscore?.singlePlayer.timer.easy}
                   </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
                   <span className="value normal">
-                    {state.highscore.singlePlayer.timer.normal}
+                    {state.highscore?.singlePlayer.timer.normal}
                   </span>
                 </div>
                 <div>
                   <span className="type">Hard</span>
                   <span className="value difficult">
-                    {state.highscore.singlePlayer.timer.hard}
+                    {state.highscore?.singlePlayer.timer.hard}
                   </span>
                 </div>
               </div>
@@ -72,19 +72,19 @@ function StatsPage() {
                 <div>
                   <span className="type">Easy</span>
                   <span className="value">
-                    {state.highscore.multiPlayer.timer.easy}
+                    {state.highscore?.multiPlayer.timer.easy}
                   </span>
                 </div>
                 <div>
                   <span className="type">Normal</span>
                   <span className="value">
-                    {state.highscore.multiPlayer.timer.normal}
+                    {state.highscore?.multiPlayer.timer.normal}
                   </span>
                 </div>
                 <div>
                   <span className="type">Hard</span>
                   <span className="value">
-                    {state.highscore.multiPlayer.timer.hard}
+                    {state.highscore?.multiPlayer.timer.hard}
                   </span>
                 </div>
               </div>

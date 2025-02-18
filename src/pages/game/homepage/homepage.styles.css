@@ -34,4 +34,6 @@ body {
   width: 70%;
   height: 65%;
   border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 10px 10px 10px #f4edd365;
 }

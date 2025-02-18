@@ -19,19 +19,14 @@ class Word {
     this.lifeCounter = 0;
   }
 
-  update() {
+  update(context) {
     this.lifeCounter++;
-    this.draw();
-    if (
-      this.x +
-        (this.ctx.measureText(this.collidedLetters).width +
-          this.ctx.measureText(this.selectedLetters).width +
-          this.ctx.measureText(this.notSelectedLetters).width) >=
-        600 ||
-      this.x <= 0
-    ) {
+    this.draw(context);
+
+    if (this.x + this.width >= 600 || this.x <= 0) {
       this.dx = -this.dx;
     }
+
     if (this.height >= this.canvasHeight) {
       this.height + 3;
     }
@@ -50,37 +45,42 @@ class Word {
     this.y += this.dy;
   }
 
-  draw() {
-    this.ctx.beginPath();
-    this.ctx.shadowColor = "gray";
-    this.ctx.shadowBlur = 3;
-    this.ctx.shadowOffsetX = 5;
-    this.ctx.shadowOffsetY = 5;
-    this.ctx.font = `bold ${this.fontSize}px courier`;
+  draw(context) {
+    context.beginPath();
+    context.shadowColor = "gray";
+    context.shadowBlur = 3;
+    context.shadowOffsetX = 5;
+    context.shadowOffsetY = 5;
+    context.font = `bold ${this.fontSize}px courier`;
 
-    this.ctx.fillStyle = this.collidedLettersColor;
-    this.ctx.fillText(this.collidedLetters, this.x, this.y);
+    context.fillStyle = this.collidedLettersColor;
+    context.fillText(this.collidedLetters, this.x, this.y);
 
-    this.ctx.fillStyle = this.notSelectedLettersColor;
-    this.ctx.fillText(
+    context.strokeStyle = "red";
+    context.lineWidth = 3;
+    context.strokeText(
       this.selectedLetters,
-      this.x + this.ctx.measureText(this.collidedLetters).width,
+      this.x + context.measureText(this.collidedLetters).width,
+      this.y
+    );
+    context.fillStyle = this.notSelectedLettersColor;
+    context.fillText(
+      this.selectedLetters,
+      this.x + context.measureText(this.collidedLetters).width,
       this.y
     );
 
     const selectedLettersWidth =
-      this.ctx.measureText(this.collidedLetters).width +
-      this.ctx.measureText(this.selectedLetters).width;
+      context.measureText(this.collidedLetters).width +
+      context.measureText(this.selectedLetters).width;
 
-    this.ctx.fillStyle = this.notSelectedLettersColor;
-    this.ctx.strokeStyle = "red";
-    this.ctx.lineWidth = 5;
-    this.ctx.strokeText(
+    context.fillStyle = this.notSelectedLettersColor;
+    context.strokeText(
       this.notSelectedLetters,
       this.x + selectedLettersWidth,
       this.y
     );
-    this.ctx.fillText(
+    context.fillText(
       this.notSelectedLetters,
       this.x + selectedLettersWidth,
       this.y
@@ -108,6 +108,12 @@ class Word {
   notSelectedLettersIsEmpty = function () {
     return this.notSelectedLetters === "";
   };
+
+  reset() {
+    this.selectedLetters = "";
+    this.notSelectedLetters = this.word;
+    this.collidedLetters = "";
+  }
 
   wordIsCompleted() {
     return this.collidedLetters.includes(this.word);
@@ -197,10 +203,9 @@ class Words {
     this.words.splice(index, 1);
   }
 
-  update() {
+  update(context) {
     this.words.forEach((word) => {
-      word.checkCollitiondWithWords(this.words);
-      word.update();
+      word.update(context);
     });
   }
 
@@ -210,8 +215,16 @@ class Words {
     })[0];
   }
 
+  getWords() {
+    return this.words;
+  }
+
   isEmpty() {
     return this.words.length === 0;
+  }
+
+  getLength() {
+    return this.words.length;
   }
 
   wordIsBellowWall() {
@@ -246,6 +259,31 @@ class Words {
     this.words.forEach((word) => {
       word.checkCollitiondWithWord(this.words);
     });
+  }
+
+  static createFromJson(json) {
+    const newWords = new Words();
+    json.words.forEach((word) => {
+      let newWord = new Word(
+        word.word,
+        word.ctx,
+        word.canvasHeight,
+        word.x,
+        word.y,
+        word.dx,
+        word.dy
+      );
+
+      newWord.selectedLetters = word.selectedLetters;
+      newWord.notSelectedLetters = word.notSelectedLetters;
+      newWord.collidedLetters = word.collidedLetters;
+      newWord.life = word.life;
+      newWord.lifeCounter = word.lifeCounter;
+
+      newWords.add(newWord);
+    });
+
+    return newWords;
   }
 }
 

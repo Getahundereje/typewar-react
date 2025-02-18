@@ -2,6 +2,11 @@
   display: none;
 }
 
+.custom-radio-button[type="radio"]:disabled {
+  cursor: crosshair;
+  opacity: 0.9;
+}
+
 .custom-radio-label {
   display: inline-block;
   border: 1px solid wheat;

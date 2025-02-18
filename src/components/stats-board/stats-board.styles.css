@@ -1,0 +1,14 @@
+.game-page-states-board {
+  font-family: "Lilita One", serif;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 10%;
+  background-color: rgba(255, 255, 255, 0.356);
+  position: absolute;
+  padding: 20px;
+}
+
+.game-page-states-board .stats {
+  font-size: 24px;
+}
