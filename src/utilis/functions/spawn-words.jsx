@@ -13,8 +13,8 @@ function spawnWords(
   timeInterval,
   canvasContext,
   canvasHeight,
-  selectedWords,
-  wordsCollection,
+  wordsContext,
+  gameType,
   isBonus = false
 ) {
   let currentItration = 1;
@@ -25,27 +25,48 @@ function spawnWords(
 
   function spawnWord() {
     for (let i = 0; i < numberOfWordsToSpawnOnce; i++) {
-      const index = generateWordIndex(wordsCollection);
+      let index =
+        gameType === "singlePlayer"
+          ? generateWordIndex(wordsContext.notSelectedWords.current)
+          : wordsContext.wordsPosition.current[i].index;
 
-      const word = wordsCollection[index];
+      let word = wordsContext.notSelectedWords.current[index];
+
+      while (wordsContext.currentSelectedWords.current.includes(word)) {
+        console.log("includes");
+        index =
+          gameType === "singlePlayer"
+            ? generateWordIndex(wordsContext.notSelectedWords.current)
+            : wordsContext.wordsPosition.current[i].index;
+
+        word = wordsContext.notSelectedWords.current[index];
+      }
 
       if (word) {
-        wordsCollection.splice(index, 1);
-
         const x =
-          wordsEntrancePoints[
-            wordsEntrancePointsAccessOrder[currentEntrancePoint]
-          ];
+          gameType === "singlePlayer"
+            ? wordsEntrancePoints[
+                wordsEntrancePointsAccessOrder[currentEntrancePoint]
+              ]
+            : wordsContext.wordsPosition.current[index].x;
         const y = 80;
         currentEntrancePoint++;
         currentEntrancePoint =
           currentEntrancePoint % wordsEntrancePoints.length;
 
-        const dx = Math.random() - 0.5;
-        selectedWords.add(
+        const dx =
+          gameType === "singlePlayer"
+            ? Math.random() - 0.5
+            : wordsContext.wordsPosition.current[index].dx;
+
+        wordsContext.currentSelectedWords.current.add(
           new Word(word, canvasContext, canvasHeight, x, y, dx, 0.5)
         );
-        isBonus && selectedWords.createBonus();
+
+        isBonus && wordsContext.currentSelectedWords.current.createBonus();
+
+        wordsContext.notSelectedWords.current.splice(index, 1);
+        wordsContext.wordsPosition.current.splice(index, 1);
       }
     }
   }

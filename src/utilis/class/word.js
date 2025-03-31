@@ -8,37 +8,24 @@ class Word {
     this.dx = dx;
     this.dy = dy;
     this.width = this.ctx.measureText(this.word).width;
-    this.height = this.ctx.measureText(this.word).actualBoundingBoxAscent;
     this.selectedLetters = "";
     this.notSelectedLetters = this.word;
     this.collidedLetters = "";
     this.collidedLettersColor = "#D6CFB4";
     this.notSelectedLettersColor = "#FFF574";
     this.fontSize = 18;
-    this.life = 0;
-    this.lifeCounter = 0;
+    this.initialPosition = { x, y };
   }
 
   update(context) {
     this.lifeCounter++;
     this.draw(context);
 
-    if (this.x + this.width >= 600 || this.x <= 0) {
+    if (
+      this.x >= this.initialPosition.x + 60 ||
+      this.x <= this.initialPosition.x - 60
+    ) {
       this.dx = -this.dx;
-    }
-
-    if (this.height >= this.canvasHeight) {
-      this.height + 3;
-    }
-
-    if (this.lifeCounter === 20) {
-      this.life++;
-      this.lifeCounter = 0;
-    }
-
-    if (this.life > 30) {
-      this.life = 0;
-      this.dy = this.dy + this.dy / 3;
     }
 
     this.x += this.dx;
@@ -120,23 +107,29 @@ class Word {
   }
 
   isVanished() {
-    return this.y + 3 >= this.canvasHeight;
+    return this.y >= this.canvasHeight;
   }
 
   collisionEffect() {
-    this.dy = -this.dy;
-    this.life = this.life <= 10 ? 0 : this.life - 10;
-    setTimeout(() => {
+    if (this.dy > 0) {
       this.dy = -this.dy;
-    }, 100);
+      setTimeout(() => {
+        this.dy = -this.dy;
+      }, 100);
+    } else {
+      const dy = this.dy;
+      setTimeout(() => {
+        this.dy = dy;
+      }, 50);
+    }
   }
 
   getWordRect() {
     return {
       x: this.x,
-      y: this.y - this.height,
+      y: this.y - this.fontSize,
       width: this.width,
-      height: this.height,
+      height: this.fontSize,
     };
   }
 
@@ -161,19 +154,6 @@ class Word {
         y < otherHeght + otherY
       ) {
         this.dx = -this.dx;
-        // if (y < otherY) {
-        //   this.y += 3;
-        //   this.dx += this.dx * 0.1;
-
-        //   word.dx -= word.dx * 0.1;
-        //   word.y -= 3;
-        // } else {
-        //   this.y -= 3;
-        //   this.dx -= this.dx * 0.1;
-
-        //   word.dx += word.dx * 0.1;
-        //   word.y += 3;
-        // }
       }
     });
   }
@@ -236,10 +216,20 @@ class Words {
           word.notSelectedLettersColor = "#FFF574";
         }
         vanishedWords.push(word);
-        if (!word.collidedLetters || !word.selectedLetters) word.y = 20;
+        if (!word.collidedLetters || !word.selectedLetters) {
+          word.y = word.initialPosition.y;
+          word.x = word.initialPosition.x;
+          this.dy += this.dy / 3;
+        }
       }
     });
     return vanishedWords;
+  }
+
+  includes(word) {
+    return this.words.some((w) => {
+      return w.word.startsWith(word[0].toUpperCase());
+    });
   }
 
   createBonus() {
@@ -253,37 +243,6 @@ class Words {
 
   clear() {
     this.words.splice(0);
-  }
-
-  handleCollisionWithWords() {
-    this.words.forEach((word) => {
-      word.checkCollitiondWithWord(this.words);
-    });
-  }
-
-  static createFromJson(json) {
-    const newWords = new Words();
-    json.words.forEach((word) => {
-      let newWord = new Word(
-        word.word,
-        word.ctx,
-        word.canvasHeight,
-        word.x,
-        word.y,
-        word.dx,
-        word.dy
-      );
-
-      newWord.selectedLetters = word.selectedLetters;
-      newWord.notSelectedLetters = word.notSelectedLetters;
-      newWord.collidedLetters = word.collidedLetters;
-      newWord.life = word.life;
-      newWord.lifeCounter = word.lifeCounter;
-
-      newWords.add(newWord);
-    });
-
-    return newWords;
   }
 }
 

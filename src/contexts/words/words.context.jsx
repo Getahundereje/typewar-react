@@ -1,29 +1,37 @@
 import { createContext, useState, useEffect, useRef } from "react";
 import { Words } from "../../utilis/class/word";
 
+const initialVelocity = {
+  x: 0.5,
+  y: 0.5,
+};
+
 const WordsContext = createContext();
 
 // eslint-disable-next-line react/prop-types
 function WordsProvider({ children }) {
   const [wordsCollection, setWordsCollection] = useState([]);
-  let [notSelectedWords, setNotSelectedWords] = useState([...wordsCollection]);
-  let { current: currentSelectedCharacter } = useRef("");
-
-  let { current: currentSelectedWords } = useRef(new Words());
-  let { current: currentSelectedWord } = useRef("");
-  let { current: selectedWordInfo } = useRef({});
+  const notSelectedWords = useRef([...wordsCollection]);
+  const currentSelectedCharacter = useRef("");
+  const currentSelectedWords = useRef(new Words());
+  const currentSelectedWord = useRef("");
+  const selectedWordInfo = useRef({});
+  const wordsPosition = useRef([]);
+  const wordVelocity = useRef(initialVelocity);
 
   useEffect(() => {
-    setNotSelectedWords([...wordsCollection]);
+    notSelectedWords.current = [...wordsCollection];
   }, [wordsCollection]);
 
   function reset() {
     if (wordsCollection.length) {
-      currentSelectedCharacter = "";
-      currentSelectedWord = "";
-      selectedWordInfo = {};
-      currentSelectedWords.clear();
-      setNotSelectedWords([...wordsCollection]);
+      currentSelectedCharacter.current = "";
+      currentSelectedWord.current = "";
+      selectedWordInfo.current = {};
+      currentSelectedWords.current.clear();
+      wordsPosition.current = [];
+      wordVelocity.current = initialVelocity;
+      notSelectedWords.current = [...wordsCollection];
     }
   }
 
@@ -31,11 +39,13 @@ function WordsProvider({ children }) {
     currentSelectedCharacter,
     wordsCollection,
     setWordsCollection,
-    setNotSelectedWords,
     currentSelectedWords,
     currentSelectedWord,
     notSelectedWords,
     selectedWordInfo,
+    wordsPosition,
+    wordVelocity,
+
     reset,
   };
 

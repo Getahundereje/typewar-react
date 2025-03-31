@@ -18,13 +18,13 @@ function GameHomepage() {
     useGameState();
 
   function handleMenuButtonsClick(e) {
-    if (e.code === "Enter") {
+    if (e.code === "Enter" || e.code === "click") {
       if (document.activeElement === buttonsRef[0].current) {
-        navigate("/game/gamePage");
+        navigate("/game/gamePage", { replace: true });
       } else if (document.activeElement === buttonsRef[1].current) {
         wordsContext.reset();
         resetGameStates();
-        navigate("/game/gamePage");
+        navigate("/game/gamePage", { replace: true });
       } else if (document.activeElement === buttonsRef[2].current) {
         navigate("/game/settings");
       } else if (document.activeElement === buttonsRef[3].current) {
@@ -36,10 +36,6 @@ function GameHomepage() {
   }
 
   useEffect(() => {
-    function handleClick(e) {
-      e.preventDefault();
-    }
-
     function handleArrowClick(e) {
       e.preventDefault();
 
@@ -68,14 +64,13 @@ function GameHomepage() {
 
     if (firstTime) {
       document.addEventListener("keydown", handleArrowClick);
-      document.addEventListener("mousedown", handleClick);
 
       setFirstTime(false);
     }
   }, [focusedButtonId, firstTime]);
 
   return (
-    <div className="homepage-container">
+    <div className="container">
       <div className="menu-list">
         {continueGame ? (
           <GameCustomButton

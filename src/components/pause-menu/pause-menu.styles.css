@@ -3,69 +3,108 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #3f4f44, #09122c);
-  backdrop-filter: blur(8px);
-  border-radius: 20px;
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 0;
   top: 20%;
   left: 20%;
-  width: 340px;
-  padding-top: 50px;
-  animation: growOutward 0.5s ease-out forwards;
+  width: 380px;
+  padding-top: 60px;
+  animation: growOutward 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  border-top: 3px solid #ff0000;
+  border-bottom: 3px solid #ff0000;
+  box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
+  z-index: 100;
 }
 
 .pause-menu {
   width: 100%;
-  padding: 0 20px 40px;
+  padding: 0 25px 40px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   min-width: 300px;
 }
 
 .pause-menu .title {
-  display: inline;
+  display: inline-block;
   position: absolute;
-  font-family: "Bungee Spice", sans-serif;
-  font-size: 40px;
+  font-family: "Agency FB", "Bungee Spice", sans-serif;
+  font-size: 42px;
+  font-weight: 700;
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 50, 50, 0.8);
+  white-space: nowrap;
+  color: #fff;
+  padding: 0 25px;
+  background: rgba(20, 20, 20, 0.9);
+  border: 2px solid rgba(255, 50, 50, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pause-menu .title::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 25%;
+  width: 50%;
+  height: 3px;
+  background: #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
 }
 
 .pause-menu button {
-  background-color: #aab99a;
+  background: linear-gradient(to bottom, #333, #222);
+  color: #fff;
   display: block;
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
+  padding: 15px;
+  margin: 15px 0;
   border: none;
-  border-radius: 10px;
-  font-size: 18px;
-  font-weight: bold;
+  border-radius: 0;
+  font-size: 20px;
+  font-family: "Agency FB", "Rajdhani", sans-serif;
+  font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
+  position: relative;
+  border-left: 3px solid #ff0000;
 }
 
 .pause-menu button:hover {
+  background: linear-gradient(to bottom, #444, #333);
   transform: translateY(-3px);
-  filter: brightness(120%);
+  box-shadow: 0 6px 15px rgba(255, 0, 0, 0.4);
+  color: #ffcc00;
 }
 
 .pause-menu button:active {
   transform: translateY(1px);
+  background: linear-gradient(to bottom, #222, #111);
+}
+
+.pause-menu button::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  background: #f00;
+  border-radius: 50%;
 }
 
 @keyframes growOutward {
   0% {
-    transform: scale(0);
     opacity: 0;
-  }
-  80% {
-    transform: scale(1.1);
-    opacity: 1;
+    transform: scale(0.8);
   }
   100% {
+    opacity: 1;
     transform: scale(1);
   }
 }

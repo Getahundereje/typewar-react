@@ -1,6 +1,7 @@
 import "./loading-spinner.styles.css";
 
-function LoadingSpinner() {
+// eslint-disable-next-line react/prop-types
+function LoadingSpinner({ message }) {
   return (
     <div className="loading-spinner-container">
       <svg
@@ -45,7 +46,7 @@ function LoadingSpinner() {
           </g>
         </g>
       </svg>
-      <p className="loading-message">Loading...</p>
+      <p className="loading-message">{message}</p>
     </div>
   );
 }

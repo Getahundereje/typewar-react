@@ -1,34 +1,77 @@
 .menu-button {
-  font-family: "Lilita One", serif;
-  font-size: 40px;
-  font-weight: 500;
-  margin-top: 1rem;
-  padding: 5px;
-  color: #f4edd39d;
-  background-color: transparent;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0.8rem 0;
+  padding: 12px 30px;
+  color: #ffd700;
+  background: transparent;
   position: relative;
   border: none;
+  width: 80%;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.menu-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50px;
+  z-index: -1;
+}
+
+.menu-button:hover::before {
+  opacity: 1;
 }
 
 .menu-button:focus {
-  color: #f4edd3;
-  background-color: #a5bfcc;
+  color: #fff;
+  background: rgba(50, 50, 50, 0.4);
   outline: none;
-  border-top: 1px solid #f4edd3;
-  border-bottom: 1px solid #f4edd3;
+  transform: scale(1.1);
+  text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+  box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
 }
 
 .menu-button:focus:after {
   content: "";
   background-image: url("/assets/game-assets/images/archer-icon.png");
-  background-size: cover;
-  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
   position: absolute;
-  top: 15px;
-  right: 15%;
+  top: 50%;
+  right: 5%;
   width: 40px;
-  height: 30px;
-  transform: rotate(220deg);
+  height: 40px;
+  transform: translateY(-50%) rotate(-15deg);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
   z-index: 1;
+  animation: iconPulse 2s infinite ease-in-out;
+}
+
+@keyframes iconPulse {
+  0%,
+  100% {
+    transform: translateY(-50%) rotate(-15deg) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) rotate(-15deg) scale(1.1);
+  }
 }

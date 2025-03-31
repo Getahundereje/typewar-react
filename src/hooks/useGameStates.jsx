@@ -10,6 +10,8 @@ const useGameState = () => {
   const [currentTime, setCurrentTime] = useState(
     gameState.currentTime ?? { min: 0, sec: 0 }
   );
+  const [gameTypeSelectionStage, setGameTypeSelectionStage] = useState(true);
+  const [gameType, setGameType] = useState(gameState.gameType ?? "");
   const [entryStage, setEntryStage] = useState(gameState.entryStage ?? true);
   const [pauseGame, setPauseGame] = useState(gameState.pauseGame ?? false);
   const [gameover, setGameover] = useState(false);
@@ -23,6 +25,7 @@ const useGameState = () => {
   const [continueGame, setContinueGame] = useState(
     gameState.continueGame ?? false
   );
+  const [waitingOpponent, setWaitingOpponent] = useState(true);
 
   // Refs
   const firstTime = useRef(gameState.continueGame ? false : true);
@@ -49,6 +52,9 @@ const useGameState = () => {
     setPauseGame(false);
     setGameover(false);
     setContinueGame(false);
+    setGameTypeSelectionStage(true);
+    setGameType("");
+    setWaitingOpponent(true);
 
     clearInterval(currenTimeStoper.current);
     currenTimeStoper.current = undefined;
@@ -100,6 +106,12 @@ const useGameState = () => {
     setFocusedButtonId,
     continueGame,
     setContinueGame,
+    gameType,
+    setGameType,
+    gameTypeSelectionStage,
+    setGameTypeSelectionStage,
+    waitingOpponent,
+    setWaitingOpponent,
 
     // Refs
     firstTime,

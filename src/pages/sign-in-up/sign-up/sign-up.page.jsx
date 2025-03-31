@@ -75,7 +75,7 @@ function SignUp() {
       userContext.updateUser(data.data);
 
       if (data.status === "succuss") {
-        navigate("/game/homepage");
+        navigate("/signin");
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -106,7 +106,7 @@ function SignUp() {
 
   return (
     <>
-      <section className="container">
+      <section className="sign-in-up-container">
         <p className="title">
           Sign Up <span>Sign up to continue</span>
         </p>
@@ -148,7 +148,7 @@ function SignUp() {
           >
             Sign up
           </FormCustomButton>
-          {errorMessage ? <p className="error-message">{errorMessage}</p> : ""}
+          {errorMessage ? <p className="error-message">{errorMessage}</p> : " "}
           <FormInput
             type="checkbox"
             name="remember-me"

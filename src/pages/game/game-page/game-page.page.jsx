@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Howl } from "howler";
+import { io } from "socket.io-client";
 import axios from "axios";
 
 import { Bullet } from "../../../utilis/class/bullet";
@@ -19,6 +21,7 @@ import PauseMenu from "../../../components/pause-menu/pause-menu.component.jsx";
 import StatsBoard from "../../../components/stats-board/stats-board.component.jsx";
 import useGameState from "../../../hooks/useGameStates.jsx";
 import updatePlayerSetting from "../../../utilis/functions/updatePlayerState.js";
+import GameCustomButton from "../../../components/game-custom-button/game-custom-button.component.jsx";
 
 import "./game-page.styles.css";
 
@@ -46,6 +49,11 @@ function GamePage() {
     userContext.user?.playerState || ""
   );
 
+  const [reloadHandled, setReloadHandled] = useSessionStorage(
+    "reloadHandled",
+    false
+  );
+
   const {
     score,
     setScore,
@@ -60,6 +68,12 @@ function GamePage() {
     gameover,
     setGameover,
     setContinueGame,
+    gameType,
+    setGameType,
+    gameTypeSelectionStage,
+    setGameTypeSelectionStage,
+    waitingOpponent,
+    setWaitingOpponent,
 
     // Refs
     firstTime,
@@ -77,6 +91,11 @@ function GamePage() {
 
   const canvasRef = useRef();
   let { current: styles } = useRef([]);
+  const socket = useRef(null);
+  const shooter = useRef("");
+  const canvasWidth = useRef(0);
+  const canvasHeight = useRef(0);
+  const canvasCtx = useRef({});
 
   const maxNumberOfWordsOnScreen = 7;
 
@@ -111,18 +130,6 @@ function GamePage() {
     }),
   };
 
-  function handleCharactreClick(e, wordsContext) {
-    if (e.keyCode >= 65 && e.keyCode <= 90) {
-      wordsContext.currentSelectedCharacter = e.key;
-    }
-
-    if (e.code === "Escape") {
-      setContinueGame(true);
-      setPauseGame(true);
-      clearInterval(currenTimeStoper.current);
-    }
-  }
-
   function resetGame() {
     wordsContext.reset();
     resetGameStates();
@@ -155,6 +162,13 @@ function GamePage() {
       resetGame();
       navigate("/game/homepage");
     }
+  }
+
+  function handleGameTypeSelectionButton(e) {
+    e.preventDefault();
+
+    setGameType(e.target.name);
+    setGameTypeSelectionStage(false);
   }
 
   function timer(minute, currentTime, dedactedTime) {
@@ -201,6 +215,226 @@ function GamePage() {
     styles = styles.filter((_, i) => i !== index);
   }
 
+  function shootSelectedWord(wordsContext) {
+    if (wordsContext.currentSelectedCharacter.current) {
+      if (!wordsContext.currentSelectedWord.current[shooter.current]) {
+        wordsContext.currentSelectedWord.current = {
+          ...wordsContext.currentSelectedWord.current,
+          [shooter.current]: wordsContext.currentSelectedWords.current.getWord(
+            wordsContext.currentSelectedCharacter.current
+          ),
+        };
+      }
+
+      const selectedCharacter =
+        wordsContext.currentSelectedCharacter.current.toUpperCase();
+
+      if (
+        wordsContext.currentSelectedWord.current[
+          shooter.current
+        ]?.notSelectedLetters.startsWith(selectedCharacter)
+      ) {
+        const { velocity } = calculateIntercept(
+          wordsContext.currentSelectedWord.current[shooter.current],
+          {
+            x: canvasWidth.current / 2 - 10,
+            y: canvasHeight.current - 23,
+          },
+          10
+        );
+
+        gameSounds.bulletShoot.play();
+
+        bullets.shootBullets(
+          new Bullet(
+            canvasCtx.current,
+            canvasWidth.current,
+            canvasWidth.current / 2 - 10,
+            canvasHeight.current - 23,
+            { x: velocity.vx, y: Math.abs(velocity.vy) },
+            3
+          )
+        );
+
+        wordsContext.selectedWordInfo.current = {
+          [shooter.current]: {
+            rect: wordsContext.currentSelectedWord.current[
+              shooter.current
+            ].getWordRect(),
+          },
+        };
+
+        wordsContext.currentSelectedWord.current[
+          shooter.current
+        ].setSelectedLetters(wordsContext.currentSelectedCharacter.current);
+
+        trueShoot.current++;
+      } else {
+        if (gameType === "singlePlayer") {
+          if (playerState.setting.gameMode === "staged") {
+            setChanceLeft((chanceLeft) => (chanceLeft ? chanceLeft - 1 : 0));
+          } else if (playerState.setting.gameMode === "timer") {
+            if (Number.parseInt(currentTime.sec) > 10 || currentTime.min > 0) {
+              clearInterval(currenTimeStoper.current);
+              timer(5, currentTime, 10);
+            } else setGameover(true);
+          }
+
+          if (playerState.setting.gameMode !== "practice") {
+            gameSounds.error.play();
+            successiveWordAnswers.current = 0;
+            styles.push({
+              type: "deduction",
+              value: playerState.setting.gameMode === "timer" ? 10 : 1,
+              style: {
+                top: `${50}px`,
+                left: `${canvasWidth.current - 100}px`,
+              },
+            });
+          }
+        } else if (gameType === "multiplayer") {
+          wordsContext.currentSelectedWord.current[shooter.current].reset();
+          wordsContext.currentSelectedWord.current[shooter.current] = undefined;
+          wordsContext.currentSelectedCharacter.current = undefined;
+        }
+
+        falseShoot.current += 1;
+      }
+      wordsContext.currentSelectedCharacter.current = "";
+    }
+  }
+
+  function handleBulletHit(wordsContext) {
+    if (
+      bullets
+        ?.head()
+        ?.isCollidedWithWord(
+          wordsContext.selectedWordInfo.current[shooter.current].rect
+        )
+    ) {
+      gameSounds.collision.play();
+      wordsContext.currentSelectedWord.current[
+        shooter.current
+      ].setCollidedLetter();
+      wordsContext.currentSelectedWord.current[
+        shooter.current
+      ].collisionEffect();
+
+      bullets?.remove();
+
+      if (
+        wordsContext.currentSelectedWord.current[
+          shooter.current
+        ].wordIsCompleted()
+      ) {
+        wordsContext.currentSelectedWords.current.remove(
+          wordsContext.currentSelectedWord.current[shooter.current]
+        );
+
+        if (
+          (playerState.setting.gameMode === "timer" &&
+            wordsContext.currentSelectedWords.current.getLength() <
+              maxNumberOfWordsOnScreen) ||
+          (currentStageNumberOfWords.current > maxNumberOfWordsOnScreen &&
+            wordsContext.currentSelectedWords.current.getLength() <
+              maxNumberOfWordsOnScreen &&
+            currentStageNotRenderedWords.current)
+        ) {
+          currentStageNotRenderedWords.current--;
+          spawnWords(
+            1,
+            gameSettingsProperty[playerState.setting.gameMode][
+              playerState.setting.difficulty
+            ],
+            canvasCtx.current,
+            canvasHeight.current,
+            wordsContext,
+            gameType
+          );
+        }
+
+        if (gameType === "singlePlayer") {
+          if (
+            wordsContext.currentSelectedWords.current.isBonus(
+              wordsContext.currentSelectedWord.current[shooter.current]
+            )
+          ) {
+            styles.push({
+              type: "bonus",
+              value: 3,
+              style: {
+                top: `${
+                  wordsContext.selectedWordInfo.current[shooter.current].rect.y
+                }px`,
+                left: `${
+                  wordsContext.selectedWordInfo.current[shooter.current].rect.x
+                }px`,
+              },
+            });
+            setScore((score) => score + 3);
+          } else {
+            successiveWordAnswers.current += 1;
+            setScore((score) => score + 1);
+          }
+          currentStageRemainingWords.current--;
+
+          if (successiveWordAnswers.current === 3) {
+            successiveWordAnswers.current = 0;
+            currentStageRemainingWords.current++;
+            spawnWords(
+              1,
+              gameSettingsProperty[playerState.setting.gameMode][
+                playerState.setting.difficulty
+              ],
+              canvasCtx.current,
+              canvasHeight.current,
+              wordsContext,
+              gameType,
+              true
+            );
+          }
+
+          // check if a stage is completed
+          if (
+            playerState.setting.gameMode === "staged" &&
+            currentStageRemainingWords.current === 0
+          ) {
+            firstTime.current = true;
+            stageNumber.current += 1;
+
+            currentStageNumberOfWords.current +=
+              currentStageNumberOfWords.current < 20
+                ? Math.floor(currentStageNumberOfWords.current / 3)
+                : 0;
+            currentStageRemainingWords.current =
+              currentStageNumberOfWords.current;
+
+            setEntryStage(true);
+          }
+        } else if (gameType === "multiplayer") {
+          socket.current.emit("updateScore");
+        }
+
+        gameSounds.wordCompletion.play();
+        wordsContext.currentSelectedWord.current[shooter.current] = undefined;
+      } else if (gameType === "singlePlayer") {
+        styles.push({
+          type: "bonus",
+          value: 1,
+          style: {
+            top: `${
+              wordsContext.selectedWordInfo.current[shooter.current].rect.y
+            }px`,
+            left: `${
+              wordsContext.selectedWordInfo.current[shooter.current].rect.x
+            }px`,
+          },
+        });
+        setScore((score) => score + 1);
+      }
+    }
+  }
+
   async function getWords() {
     try {
       const response = await axios.get("http://localhost:8000/words", {
@@ -209,30 +443,83 @@ function GamePage() {
       const { data } = response;
       wordsContext.setWordsCollection(data.data.words);
     } catch (error) {
-      console.log(error);
+      if (error.status === 401) {
+        navigate("/signin", {
+          replace: true,
+        });
+      }
     }
   }
 
-  function renderIntroPage() {
-    setTimeout(() => {
-      setEntryStage(false);
-    }, 3000);
-  }
+  useEffect(() => {}, []);
 
   useEffect(() => {
-    if (!wordsContext.wordsCollection.length) {
-      getWords();
+    const [navigation] = performance.getEntriesByType("navigation");
+    if (navigation.type === "reload" && !reloadHandled) {
+      resetGame();
+      setReloadHandled(true);
+      navigate("/game/homepage", { replace: true });
+    } else if (navigation.type === "back_forward") {
+      resetGame();
     }
 
-    if (entryStage) {
-      gameSounds.menu.play();
-    }
+    window.addEventListener("beforeunload", () => {
+      setReloadHandled(false);
+    });
 
     return () => {
-      gameSounds.menu.stop();
       resetGameStates();
     };
   }, []);
+
+  useEffect(() => {
+    if (!wordsContext.wordsCollection.length && gameType === "singlePlayer") {
+      getWords();
+      shooter.current = "single";
+    } else if (gameType === "multiplayer" && !socket.current) {
+      socket.current = io("http://localhost:8000", {
+        withCredentials: true,
+      });
+
+      socket.current.on("gameStart", (data) => {
+        wordsContext.wordsPosition.current = data.data.wordsPosition;
+        wordsContext.setWordsCollection(data.data.wordsCollection);
+        setWaitingOpponent(false);
+      });
+
+      socket.current.on("select", ({ selectedCharacter, shooterId }) => {
+        wordsContext.currentSelectedCharacter.current = selectedCharacter;
+        shooter.current = shooterId;
+      });
+
+      socket.current.on("playerDisconnected", () => {
+        setWaitingOpponent(true);
+      });
+
+      socket.current.on("score", (score) => {
+        setScore(score);
+      });
+
+      socket.current.on("timeout", () => {
+        setGameover(true);
+      });
+
+      socket.current.on("error", (message) => {
+        console.log(message);
+      });
+
+      socket.current.emit("ready", userContext.user._id);
+    }
+
+    return () => {
+      if (socket.current) {
+        socket.current.off("waiting");
+        socket.current.off("gameStart");
+        socket.current.off("select");
+        socket.current.off("ready");
+      }
+    };
+  }, [gameTypeSelectionStage]);
 
   useEffect(() => {
     if (
@@ -272,53 +559,11 @@ function GamePage() {
   }, [pauseGame, gameover]);
 
   useEffect(() => {
-    if (wordsContext.wordsCollection.length && !pauseGame) {
-      if (entryStage) {
-        renderIntroPage();
-      } else if (!entryStage && !gameover) {
-        let animationFrameId = null;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-
-        const style = getComputedStyle(canvas);
-        const canvasWidth = Number.parseInt(style.width);
-        const canvasHeight = Number.parseInt(style.height);
-
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        function handleCharactreClickWrapper(e) {
-          handleCharactreClick(e, wordsContext);
-        }
-
-        document.body.addEventListener("keydown", handleCharactreClickWrapper);
-
-        function animate() {
-          ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-          new Gun(ctx, canvasWidth / 2 - 20, canvasHeight - 20).draw();
-
-          if (firstTime.current) {
-            currentStageNotRenderedWords.current =
-              currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
-                ? 0
-                : currentStageNumberOfWords.current - maxNumberOfWordsOnScreen;
-
-            spawnWords(
-              playerState.setting.gameMode === "timer"
-                ? maxNumberOfWordsOnScreen
-                : currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
-                ? currentStageNumberOfWords.current
-                : maxNumberOfWordsOnScreen,
-              gameSettingsProperty[playerState.setting.gameMode][
-                playerState.setting.difficulty
-              ],
-              ctx,
-              canvasHeight,
-              wordsContext.currentSelectedWords,
-              wordsContext.notSelectedWords
-            );
-            firstTime.current = false;
+    if (!gameTypeSelectionStage) {
+      if (wordsContext.wordsCollection.length && !pauseGame) {
+        if (entryStage) {
+          setTimeout(() => {
+            setEntryStage(false);
             if (playerState.setting.gameMode === "timer") {
               timer(
                 5,
@@ -329,247 +574,143 @@ function GamePage() {
                 0
               );
             }
+            currentStageNotRenderedWords.current =
+              currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
+                ? 0
+                : currentStageNumberOfWords.current - maxNumberOfWordsOnScreen;
+          }, 3000);
+        } else if (!gameover) {
+          let animationFrameId = null;
+          const canvas = canvasRef.current;
+          canvasCtx.current = canvas.getContext("2d");
+
+          const style = getComputedStyle(canvas);
+          canvasWidth.current = canvas.width = Number.parseInt(style.width);
+          canvasHeight.current = canvas.height = Number.parseInt(style.height);
+
+          function handleCharactreClick(e) {
+            if (e.keyCode >= 65 && e.keyCode <= 90) {
+              if (gameType === "singlePlayer") {
+                wordsContext.currentSelectedCharacter.current = e.key;
+              } else if (gameType === "multiplayer") {
+                socket.current.emit("selectCharacter", e.key);
+              }
+              shootSelectedWord(wordsContext);
+            }
+
+            if (e.code === "Escape") {
+              setContinueGame(true);
+              setPauseGame(true);
+              clearInterval(currenTimeStoper.current);
+            }
           }
 
-          wordsContext.currentSelectedWords.update(ctx);
+          document.addEventListener("keydown", handleCharactreClick);
 
-          if (wordsContext.currentSelectedCharacter) {
-            if (!wordsContext.currentSelectedWord) {
-              wordsContext.currentSelectedWord =
-                wordsContext.currentSelectedWords.getWord(
-                  wordsContext.currentSelectedCharacter
-                );
-            }
-            if (
-              wordsContext.currentSelectedWord?.notSelectedLetters.startsWith(
-                wordsContext.currentSelectedCharacter.toUpperCase()
-              )
-            ) {
-              const { velocity } = calculateIntercept(
-                {
-                  ...wordsContext.currentSelectedWord,
-                  x:
-                    wordsContext.currentSelectedWord.x +
-                    wordsContext.currentSelectedWord.width / 2,
-                },
-                {
-                  x: canvasWidth / 2,
-                  y: canvasHeight - 20,
-                },
-                8
-              );
+          if (firstTime.current) {
+            spawnWords(
+              playerState.setting.gameMode === "timer"
+                ? maxNumberOfWordsOnScreen
+                : currentStageNumberOfWords.current < maxNumberOfWordsOnScreen
+                ? currentStageNumberOfWords.current
+                : maxNumberOfWordsOnScreen,
+              gameSettingsProperty[playerState.setting.gameMode][
+                playerState.setting.difficulty
+              ],
+              canvasCtx.current,
+              canvasHeight.current,
+              wordsContext,
+              gameType
+            );
+            firstTime.current = false;
+          }
 
-              wordsContext.selectedWordInfo = {
-                rect: wordsContext.currentSelectedWord.getWordRect(),
-              };
+          function animate() {
+            canvasCtx.current.clearRect(
+              0,
+              0,
+              canvasWidth.current,
+              canvasHeight.current
+            );
 
-              wordsContext.currentSelectedWord.setSelectedLetters(
-                wordsContext.currentSelectedCharacter
-              );
+            new Gun(
+              canvasCtx.current,
+              canvasWidth.current / 2 - 20,
+              canvasHeight.current - 20
+            ).draw();
 
-              gameSounds.bulletShoot.play();
-              bullets.shootBullets(
-                new Bullet(
-                  ctx,
-                  canvasWidth,
-                  canvasWidth / 2 - 10,
-                  canvasHeight - 20,
-                  { x: velocity.vx, y: Math.abs(velocity.vy) },
-                  3
-                )
-              );
+            handleBulletHit(wordsContext);
+            wordsContext.currentSelectedWords.current.update(canvasCtx.current);
 
-              trueShoot.current += 1;
-            } else {
-              if (playerState.setting.gameMode === "staged") {
-                setChanceLeft((chanceLeft) =>
-                  chanceLeft ? chanceLeft - 1 : 0
-                );
-              } else if (playerState.setting.gameMode === "timer") {
+            const vanishedWords =
+              wordsContext.currentSelectedWords.current.wordIsBellowWall();
+
+            if (vanishedWords.length) {
+              gameSounds.vanishing.play();
+              successiveWordAnswers.current = 0;
+              vanishedWords.forEach((vanishedWord) => {
                 if (
-                  Number.parseInt(currentTime.sec) > 10 ||
-                  currentTime.min > 0
+                  wordsContext.currentSelectedWord.current[shooter.current] &&
+                  vanishedWord.isEqual(
+                    wordsContext.currentSelectedWord.current[shooter.current]
+                  )
                 ) {
-                  clearInterval(currenTimeStoper.current);
-                  timer(5, currentTime, 10);
-                } else setGameover(true);
-              }
+                  vanishedWord.reset();
+                  wordsContext.currentSelectedWord.current[shooter.current] =
+                    undefined;
+                  wordsContext.currentSelectedCharacter.current = undefined;
+                }
 
-              if (playerState.setting.gameMode !== "practice") {
-                gameSounds.error.play();
-                successiveWordAnswers.current = 0;
-                styles.push({
-                  type: "deduction",
-                  value: playerState.setting.gameMode === "timer" ? 10 : 1,
-                  style: {
-                    top: `${50}px`,
-                    left: `${canvasWidth - 100}px`,
-                  },
-                });
-              }
+                if (gameType === "singlePlayer") {
+                  if (playerState.setting.gameMode === "staged") {
+                    setChanceLeft((chanceLeft) => chanceLeft - 1);
+                  } else if (playerState.setting.gameMode === "timer") {
+                    clearInterval(currenTimeStoper.current);
+                    timer(5, currentTime, 10);
+                  }
 
-              falseShoot.current += 1;
-            }
-            wordsContext.currentSelectedCharacter = undefined;
-          }
+                  if (
+                    wordsContext.currentSelectedWords.current.isBonus(
+                      vanishedWord
+                    )
+                  ) {
+                    wordsContext.notSelectedWords.current = [
+                      ...wordsContext.notSelectedWords.current,
+                      vanishedWord.word,
+                    ];
+                    wordsContext.currentSelectedWords.current.remove(
+                      vanishedWord
+                    );
+                    currentStageRemainingWords.current--;
+                  }
 
-          if (
-            bullets
-              ?.head()
-              ?.isCollidedWithWord(wordsContext.selectedWordInfo.rect)
-          ) {
-            gameSounds.collision.play();
-            wordsContext.currentSelectedWord.setCollidedLetter();
-            wordsContext.currentSelectedWord.collisionEffect();
-
-            bullets?.remove();
-
-            if (wordsContext.currentSelectedWord?.wordIsCompleted()) {
-              wordsContext.currentSelectedWords.remove(
-                wordsContext.currentSelectedWord
-              );
-              if (
-                wordsContext.currentSelectedWords.isBonus(
-                  wordsContext.currentSelectedWord
-                )
-              ) {
-                styles.push({
-                  type: "bonus",
-                  value: 3,
-                  style: {
-                    top: `${wordsContext.selectedWordInfo.rect.y}px`,
-                    left: `${wordsContext.selectedWordInfo.rect.x}px`,
-                  },
-                });
-                setScore((score) => score + 3);
-              } else {
-                successiveWordAnswers.current += 1;
-                setScore((score) => score + 1);
-              }
-
-              gameSounds.wordCompletion.play();
-              wordsContext.currentSelectedWord = undefined;
-              currentStageRemainingWords.current--;
-
-              if (successiveWordAnswers.current === 3) {
-                successiveWordAnswers.current = 0;
-                currentStageRemainingWords.current++;
-                spawnWords(
-                  1,
-                  gameSettingsProperty[playerState.setting.gameMode][
-                    playerState.setting.difficulty
-                  ],
-                  ctx,
-                  canvasHeight,
-                  wordsContext.currentSelectedWords,
-                  wordsContext.notSelectedWords,
-                  true
-                );
-              }
-
-              if (
-                (playerState.setting.gameMode === "timer" &&
-                  wordsContext.currentSelectedWords.getLength() <
-                    maxNumberOfWordsOnScreen) ||
-                (currentStageNumberOfWords.current > maxNumberOfWordsOnScreen &&
-                  wordsContext.currentSelectedWords.getLength() <
-                    maxNumberOfWordsOnScreen &&
-                  currentStageNotRenderedWords.current)
-              ) {
-                console.log(
-                  "spawn-words",
-                  currentStageNotRenderedWords.current
-                );
-                currentStageNotRenderedWords.current--;
-                spawnWords(
-                  1,
-                  gameSettingsProperty[playerState.setting.gameMode][
-                    playerState.setting.difficulty
-                  ],
-                  ctx,
-                  canvasHeight,
-                  wordsContext.currentSelectedWords,
-                  wordsContext.notSelectedWords
-                );
-              }
-            } else {
-              styles.push({
-                type: "bonus",
-                value: 1,
-                style: {
-                  top: `${wordsContext.selectedWordInfo.rect.y}px`,
-                  left: `${wordsContext.selectedWordInfo.rect.x}px`,
-                },
+                  styles.push({
+                    type: "deduction",
+                    value: playerState.setting.gameMode === "timer" ? 10 : 1,
+                    style: {
+                      top: `${50}px`,
+                      left: `${canvasWidth.current - 100}px`,
+                    },
+                  });
+                }
               });
-              setScore((score) => score + 1);
             }
 
-            // check if a stage is completed
-            if (
-              playerState.setting.gameMode === "staged" &&
-              currentStageRemainingWords.current === 0
-            ) {
-              firstTime.current = true;
-              stageNumber.current += 1;
-
-              currentStageNumberOfWords.current +=
-                currentStageNumberOfWords.current < 20
-                  ? Math.floor(currentStageNumberOfWords.current / 3)
-                  : 0;
-              currentStageRemainingWords.current =
-                currentStageNumberOfWords.current;
-
-              setEntryStage(true);
+            if (chanceLeft === 0) {
+              setGameover(true);
+              gameSounds.gameover.play();
             }
+
+            bullets.update();
+            animationFrameId = requestAnimationFrame(animate);
           }
 
-          const vanishedWords =
-            wordsContext.currentSelectedWords.wordIsBellowWall();
-
-          if (vanishedWords.length) {
-            gameSounds.vanishing.play();
-            successiveWordAnswers.current = 0;
-            vanishedWords.forEach((word) => {
-              if (playerState.setting.gameMode === "staged") {
-                setChanceLeft((chanceLeft) => chanceLeft - 1);
-              } else if (playerState.setting.gameMode === "timer") {
-                clearInterval(currenTimeStoper.current);
-                timer(5, currentTime, 10);
-              }
-
-              if (
-                wordsContext.currentSelectedWord &&
-                word.isEqual(wordsContext.currentSelectedWord)
-              ) {
-                word.reset();
-                wordsContext.currentSelectedWord = undefined;
-                wordsContext.currentSelectedCharacter = undefined;
-              }
-
-              styles.push({
-                type: "deduction",
-                value: playerState.setting.gameMode === "timer" ? 10 : 1,
-                style: {
-                  top: `${50}px`,
-                  left: `${canvasWidth - 100}px`,
-                },
-              });
-            });
-          }
-
-          if (chanceLeft === 0) {
-            setGameover(true);
-            gameSounds.gameover.play();
-          }
-          bullets.update();
-          animationFrameId = requestAnimationFrame(animate);
+          animate();
+          return () => {
+            cancelAnimationFrame(animationFrameId);
+            document.removeEventListener("keydown", handleCharactreClick);
+          };
         }
-
-        animate();
-        return () => {
-          cancelAnimationFrame(animationFrameId);
-          document.removeEventListener("keydown", handleCharactreClickWrapper);
-        };
       }
     }
   }, [
@@ -580,17 +721,38 @@ function GamePage() {
     chanceLeft,
     playerState,
     pauseGame,
+    gameTypeSelectionStage,
+    waitingOpponent,
   ]);
 
   return (
     <div className="game-page-container">
-      {wordsContext.wordsCollection.length ? (
+      {gameTypeSelectionStage ? (
+        <div className="gameType-selection-container">
+          <GameCustomButton
+            name="singlePlayer"
+            onClick={handleGameTypeSelectionButton}
+          >
+            Single Player
+          </GameCustomButton>
+          <GameCustomButton
+            name="multiplayer"
+            onClick={handleGameTypeSelectionButton}
+          >
+            Multiplayer
+          </GameCustomButton>
+        </div>
+      ) : (
+          gameType === "singlePlayer"
+            ? wordsContext.wordsCollection.length
+            : !waitingOpponent
+        ) ? (
         entryStage ? (
           <div className="entry-page">
             <p>
               {playerState.setting.gameMode === "staged"
                 ? `STAGE ${stageNumber.current}`
-                : "READY"}
+                : "Ready"}
             </p>
           </div>
         ) : pauseGame ? (
@@ -628,7 +790,11 @@ function GamePage() {
           </>
         )
       ) : (
-        <LoadingSpinner />
+        <LoadingSpinner
+          message={
+            gameType === "multiplayer" ? "Waiting for opponent..." : "Loading"
+          }
+        />
       )}
       <canvas ref={canvasRef} className="game-canvas" />
       {styles.length

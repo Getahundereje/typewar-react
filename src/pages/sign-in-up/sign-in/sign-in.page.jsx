@@ -71,7 +71,7 @@ function SignIn() {
       console.log(data.data);
 
       if (data.status === "succuss") {
-        navigate("/game/homepage");
+        navigate("/game/homepage", { replace: true });
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -98,7 +98,7 @@ function SignIn() {
 
   return (
     <>
-      <section className="container">
+      <section className="sign-in-up-container">
         <p className="title">
           Sign In <span>Sign in to continue</span>
         </p>

@@ -1,118 +1,148 @@
 .game-over-screen {
-  background: linear-gradient(145deg, #3f4f44, #09122c);
-  color: white;
-  padding: 0 20px 20px;
-  border-radius: 15px;
+  background: linear-gradient(rgba(10, 10, 10, 0.95), rgba(20, 20, 20, 0.98));
+  color: #fff;
+  padding: 30px;
+  border-radius: 0;
   text-align: center;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 40px rgba(255, 50, 50, 0.5);
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: absolute;
-  width: 370px;
-  top: 20%;
-  left: 20%;
-  animation: growOutward 0.5s ease-out forwards;
+  width: 400px;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top: 3px solid #ff0000;
+  border-bottom: 3px solid #ff0000;
+  animation: screenFlicker 0.8s infinite alternate;
+  z-index: 1000;
 }
 
 .game-over-screen-title {
-  font-family: "Bungee Spice", sans-serif;
-  font-size: 40px;
-  transform: translate(0, -50%);
-  color: #8d1c27;
+  font-family: "Agency FB", "Rajdhani", sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+  margin-bottom: 25px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.game-over-screen-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 25%;
+  width: 50%;
+  height: 3px;
+  background: #ff0000;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
 }
 
 .game-over-screen .stats {
   font-size: 18px;
-  padding: 15px;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  border-radius: 15px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-left: 2px solid #ff0000;
+  margin-bottom: 25px;
+  text-align: left;
 }
 
 .game-over-screen .stats div {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 12px 0;
-  padding: 0 15px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  width: 100%;
+  margin: 15px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .game-over-screen .stats .value {
-  color: #4caf50;
-  text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
-  font-family: "Lilita One", serif;
+  color: #ffcc00;
+  font-family: "Rajdhani", sans-serif;
   font-size: 20px;
+  font-weight: 700;
 }
 
 .game-over-screen .stats .type {
-  color: #f4ffc3;
-  display: inline-block;
+  color: #aaa;
+  font-family: "Rajdhani", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .game-over-screen .buttons {
   display: flex;
+  gap: 10px;
   width: 100%;
-  margin-top: 15px;
-  border-radius: 10px;
 }
 
 .game-over-screen button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
+  flex: 1;
+  padding: 14px;
   border: none;
   font-size: 18px;
-  font-weight: bold;
+  font-family: "Agency FB", "Rajdhani", sans-serif;
+  font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  letter-spacing: 2px;
+  background: rgba(30, 30, 30, 0.8);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .try-again {
-  background-color: #4caf50;
-  color: white;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  background: linear-gradient(to bottom, #444, #222);
 }
 
 .menu-btn {
-  background-color: #f44336;
-  color: white;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  background: linear-gradient(to bottom, #600, #400);
 }
 
 .game-over-screen button:hover {
+  background: linear-gradient(to bottom, #555, #333);
+  color: #fff;
   transform: translateY(-3px);
-  filter: brightness(120%);
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+}
+
+.try-again:hover {
+  background: linear-gradient(to bottom, #ffcc00, #cc9900);
+  color: #000;
+}
+
+.menu-btn:hover {
+  background: linear-gradient(to bottom, #f00, #c00);
 }
 
 .game-over-screen button:active {
   transform: translateY(1px);
 }
 
-@keyframes growOutward {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.1);
+.game-over-screen button::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  background: #f00;
+  border-radius: 50%;
+}
+
+@keyframes screenFlicker {
+  0%,
+  100% {
     opacity: 1;
   }
-  100% {
-    transform: scale(1);
+  50% {
+    opacity: 0.95;
   }
 }
