@@ -41,7 +41,7 @@
   opacity: 1;
 }
 
-.menu-button:focus {
+.menu-button:hover {
   color: #fff;
   background: rgba(50, 50, 50, 0.4);
   outline: none;
@@ -50,7 +50,7 @@
   box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
 }
 
-.menu-button:focus:after {
+.menu-button:hover:after {
   content: "";
   background-image: url("/assets/game-assets/images/archer-icon.png");
   background-size: contain;
