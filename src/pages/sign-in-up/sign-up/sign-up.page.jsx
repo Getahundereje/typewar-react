@@ -7,6 +7,7 @@ import FormCustomButton from "../../../components/form-custom-button/form-custom
 import { UserContext } from "../../../contexts/user/user.context";
 
 import "../sign-in-up.styles.css";
+import SuccessMessage from "../../../components/success-message/success-message.component";
 
 function SignUp() {
   const [email, setEamil] = useState("");
@@ -18,6 +19,7 @@ function SignUp() {
   const [fullNameIsValid, setFullNameIsValid] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
@@ -75,7 +77,7 @@ function SignUp() {
       userContext.updateUser(data.data);
 
       if (data.status === "succuss") {
-        navigate("/signin");
+        setShowSuccess(true);
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -176,9 +178,27 @@ function SignUp() {
       <p className="have-account">
         Already have an account{" "}
         <span>
-          <Link to="/signin">Sign in</Link>
+          <Link
+            to="/signin"
+            style={{
+              pointerEvents: !showSuccess ? "auto" : "none",
+              opacity: !showSuccess ? 1 : 0.5,
+              cursor: !showSuccess ? "pointer" : "not-allowed",
+            }}
+          >
+            Sign in
+          </Link>
         </span>
       </p>
+      {showSuccess && (
+        <SuccessMessage
+          message="Signed up successfully."
+          onClose={() => {
+            setShowSuccess(false);
+            navigate("/signin", { replace: true });
+          }}
+        />
+      )}
     </>
   );
 }

@@ -7,6 +7,7 @@ import FormCustomButton from "../../../components/form-custom-button/form-custom
 import { UserContext } from "../../../contexts/user/user.context";
 
 import "../sign-in-up.styles.css";
+import SuccessMessage from "../../../components/success-message/success-message.component";
 
 function SignIn() {
   const [email, setEamil] = useState("");
@@ -16,6 +17,7 @@ function SignIn() {
   const [passwordIsValid, setPasswordIsValid] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ function SignIn() {
       console.log(data.data);
 
       if (data.status === "succuss") {
-        navigate("/game/homepage", { replace: true });
+        setShowSuccess(true);
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -158,9 +160,27 @@ function SignIn() {
       <p className="have-account">
         Doesn&apos;t have an account{" "}
         <span>
-          <Link to="/signup">Sign up</Link>
+          <Link
+            to="/signup"
+            style={{
+              pointerEvents: !showSuccess ? "auto" : "none",
+              opacity: !showSuccess ? 1 : 0.5,
+              cursor: !showSuccess ? "pointer" : "not-allowed",
+            }}
+          >
+            Sign up
+          </Link>
         </span>
       </p>
+      {showSuccess && (
+        <SuccessMessage
+          message="Loged in successfully."
+          onClose={() => {
+            setShowSuccess(false);
+            navigate("/game/homepage", { replace: true });
+          }}
+        />
+      )}
     </>
   );
 }
