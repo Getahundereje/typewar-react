@@ -2,10 +2,10 @@ function calculateIntercept(target, shooter, bulletSpeed) {
   const dx = target.x - shooter.x;
   const dy = target.y - shooter.y;
 
-  const targetSpeed = Math.sqrt(target.dx ** 2 + target.dy ** 2);
+  const targetSpeed = target.dy;
 
   const a = targetSpeed ** 2 - bulletSpeed ** 2;
-  const b = 2 * (dx * target.dx + dy * target.dy);
+  const b = 2 * (dy * targetSpeed);
   const c = dx ** 2 + dy ** 2;
 
   const discriminant = b ** 2 - 4 * a * c;

@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useRef } from "react";
-import { Words } from "../../utilis/class/word";
+import { Word, Words } from "../../utilis/class/word";
+import useSessionStorage from "../../hooks/useSessionStorage";
 
 const initialVelocity = {
   x: 0.5,
@@ -10,12 +11,24 @@ const WordsContext = createContext();
 
 // eslint-disable-next-line react/prop-types
 function WordsProvider({ children }) {
-  const [wordsCollection, setWordsCollection] = useState([]);
-  const notSelectedWords = useRef([...wordsCollection]);
-  const currentSelectedCharacter = useRef("");
-  const currentSelectedWords = useRef(new Words());
-  const currentSelectedWord = useRef("");
-  const selectedWordInfo = useRef({});
+  const [wordContext, setWordsContext] = useSessionStorage("wordContext", {});
+
+  const [wordsCollection, setWordsCollection] = useState(
+    wordContext.wordsCollection ?? []
+  );
+  const notSelectedWords = useRef(
+    wordContext.notSelectedWords ?? [...wordsCollection]
+  );
+  const currentSelectedCharacter = useRef(
+    wordContext.currentSelectedCharacter ?? ""
+  );
+  const currentSelectedWords = useRef(
+    Words.fromArray(wordContext.currentSelectedWords) ?? new Words()
+  );
+  const currentSelectedWord = useRef(
+    Word.fromJSON(wordContext.currentSelectedWord) ?? ""
+  );
+  const selectedWordInfo = useRef(wordContext.selectedWordInfo ?? {});
   const wordsPosition = useRef([]);
   const wordVelocity = useRef(initialVelocity);
 
@@ -35,6 +48,25 @@ function WordsProvider({ children }) {
     }
   }
 
+  function save() {
+    let selectedWord, selectedWords;
+    if (currentSelectedWords.current) {
+      selectedWords = currentSelectedWords.current.toArray();
+    }
+
+    if (currentSelectedWord.current[""]) {
+      selectedWord = currentSelectedWord.current[""].toJSON();
+    }
+
+    setWordsContext({
+      wordsCollection: wordsCollection,
+      notSelectedWords: notSelectedWords.current,
+      currentSelectedWords: selectedWords,
+      currentSelectedWord: selectedWord,
+      selectedWordInfo: selectedWordInfo.current,
+    });
+  }
+
   const wordsContextValue = {
     currentSelectedCharacter,
     wordsCollection,
@@ -47,6 +79,7 @@ function WordsProvider({ children }) {
     wordVelocity,
 
     reset,
+    save,
   };
 
   return (

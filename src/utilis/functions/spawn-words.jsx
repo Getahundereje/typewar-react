@@ -25,6 +25,7 @@ function spawnWords(
 
   function spawnWord() {
     for (let i = 0; i < numberOfWordsToSpawnOnce; i++) {
+      console.log(gameType);
       let index =
         gameType === "singlePlayer"
           ? generateWordIndex(wordsContext.notSelectedWords.current)
@@ -60,7 +61,7 @@ function spawnWords(
             : wordsContext.wordsPosition.current[index].dx;
 
         wordsContext.currentSelectedWords.current.add(
-          new Word(word, canvasContext, canvasHeight, x, y, dx, 0.5)
+          new Word(word, canvasContext, canvasHeight, x, y, 0, 0.5)
         );
 
         isBonus && wordsContext.currentSelectedWords.current.createBonus();

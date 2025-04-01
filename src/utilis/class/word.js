@@ -7,7 +7,6 @@ class Word {
     this.y = y;
     this.dx = dx;
     this.dy = dy;
-    this.width = this.ctx.measureText(this.word).width;
     this.selectedLetters = "";
     this.notSelectedLetters = this.word;
     this.collidedLetters = "";
@@ -15,6 +14,39 @@ class Word {
     this.notSelectedLettersColor = "#FFF574";
     this.fontSize = 18;
     this.initialPosition = { x, y };
+  }
+
+  toJSON() {
+    return {
+      word: this.word,
+      canvasHeight: this.canvasHeight,
+      x: this.x,
+      y: this.y,
+      dx: this.dx,
+      dy: this.dy,
+      selectedLetters: this.selectedLetters,
+      notSelectedLetters: this.notSelectedLetters,
+      collidedLetters: this.collidedLetters,
+    };
+  }
+
+  static fromJSON(jsonData) {
+    if (jsonData) {
+      const newWord = new Word(
+        jsonData.word,
+        jsonData.x,
+        jsonData.y,
+        jsonData.dx,
+        jsonData.dy
+      );
+      newWord.canvasHeight = jsonData.canvasHeight;
+      newWord.selectedLetters = jsonData.selectedLetters;
+      newWord.notSelectedLetters = jsonData.notSelectedLetters;
+      newWord.collidedLetters = jsonData.collidedLetters;
+
+      return newWord;
+    }
+    return null;
   }
 
   update(context) {
@@ -125,12 +157,17 @@ class Word {
   }
 
   getWordRect() {
-    return {
-      x: this.x,
-      y: this.y - this.fontSize,
-      width: this.width,
-      height: this.fontSize,
-    };
+    const canvas = document.createElement("canvas");
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+
+      return {
+        x: this.x,
+        y: this.y - this.fontSize,
+        width: ctx.measureText(this.word).width,
+        height: this.fontSize,
+      };
+    }
   }
 
   checkCollitiondWithWords(words) {
@@ -243,6 +280,26 @@ class Words {
 
   clear() {
     this.words.splice(0);
+  }
+
+  toArray() {
+    return this.words.map((w) => {
+      return w.toJSON();
+    });
+  }
+
+  static fromArray(sourceArray) {
+    if (sourceArray) {
+      const newWords = new Words();
+
+      sourceArray.forEach((word) => {
+        newWords.add(Word.fromJSON(word));
+      });
+
+      return newWords;
+    }
+
+    return null;
   }
 }
 

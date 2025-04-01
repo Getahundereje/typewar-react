@@ -74,6 +74,7 @@ function GamePage() {
     setGameTypeSelectionStage,
     waitingOpponent,
     setWaitingOpponent,
+    continueGame,
 
     // Refs
     firstTime,
@@ -157,6 +158,7 @@ function GamePage() {
       });
     } else if (e.target.name === "menu") {
       setPauseGame(false);
+      wordsContext.save();
       navigate("/game/homepage");
     } else if (e.target.name === "quit") {
       resetGame();
@@ -451,8 +453,6 @@ function GamePage() {
     }
   }
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     const [navigation] = performance.getEntriesByType("navigation");
     if (navigation.type === "reload" && !reloadHandled) {
@@ -711,6 +711,7 @@ function GamePage() {
             document.removeEventListener("keydown", handleCharactreClick);
           };
         }
+        console.log("hello");
       }
     }
   }, [
@@ -723,6 +724,7 @@ function GamePage() {
     pauseGame,
     gameTypeSelectionStage,
     waitingOpponent,
+    continueGame,
   ]);
 
   return (
@@ -751,49 +753,48 @@ function GamePage() {
           <div className="entry-page">
             <p>
               {playerState.setting.gameMode === "staged"
-                ? `STAGE ${stageNumber.current}`
+                ? `Stage ${stageNumber.current}`
                 : "Ready"}
             </p>
           </div>
         ) : pauseGame ? (
           <PauseMenu handlePauseGameButton={handlePauseGameButton} />
-        ) : gameover ? (
-          <GameOver
-            gameMode={playerState.setting.gameMode}
-            score={score}
-            highscore={
-              playerState.highscore.singlePlayer[playerState.setting.gameMode][
-                playerState.setting.difficulty
-              ]
-            }
-            handleGameoverButton={handleGameoverButton}
-            accuracy={
-              (
-                Math.fround(
-                  trueShoot.current / (trueShoot.current + falseShoot.current)
-                ) * 100
-              ).toFixed(1) + "%"
-            }
-          />
         ) : (
-          <>
-            {playerState.setting.gameMode === "practice" ? (
-              ""
-            ) : (
-              <StatsBoard
-                score={score}
-                gameMode={playerState.setting.gameMode}
-                chanceLeft={chanceLeft}
-                currentTime={currentTime}
-              />
-            )}
-          </>
+          gameover && (
+            <GameOver
+              gameMode={playerState.setting.gameMode}
+              score={score}
+              highscore={
+                playerState.highscore.singlePlayer[
+                  playerState.setting.gameMode
+                ][playerState.setting.difficulty]
+              }
+              handleGameoverButton={handleGameoverButton}
+              accuracy={
+                (
+                  Math.fround(
+                    trueShoot.current / (trueShoot.current + falseShoot.current)
+                  ) * 100
+                ).toFixed(1) + "%"
+              }
+            />
+          )
         )
       ) : (
-        <LoadingSpinner
-          message={
-            gameType === "multiplayer" ? "Waiting for opponent..." : "Loading"
-          }
+        !continueGame && (
+          <LoadingSpinner
+            message={
+              gameType === "multiplayer" ? "Waiting for opponent..." : "Loading"
+            }
+          />
+        )
+      )}
+      {!pauseGame && !gameover && !gameTypeSelectionStage && (
+        <StatsBoard
+          score={score}
+          gameMode={playerState.setting.gameMode}
+          chanceLeft={chanceLeft}
+          currentTime={currentTime}
         />
       )}
       <canvas ref={canvasRef} className="game-canvas" />
@@ -810,11 +811,13 @@ function GamePage() {
                   height: "fit-content",
                   fontSize: "24px",
                   position: "absolute",
-                  color: `${style.type === "deduction" ? "red" : "gold"}`,
+                  color: `${
+                    style.type === "deduction" ? "#FF4444" : "#ffd700"
+                  }`,
                   animation: `${
                     style.type === "deduction"
-                      ? "moveDown 3s forwards ease-in-out"
-                      : "moveUp 3s forwards ease-in-out"
+                      ? "moveDown 2s forwards ease-in-out"
+                      : "moveUp 2s forwards ease-in-out"
                   }`,
                 }}
               >

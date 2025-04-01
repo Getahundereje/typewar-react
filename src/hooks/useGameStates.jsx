@@ -10,18 +10,13 @@ const useGameState = () => {
   const [currentTime, setCurrentTime] = useState(
     gameState.currentTime ?? { min: 0, sec: 0 }
   );
-  const [gameTypeSelectionStage, setGameTypeSelectionStage] = useState(true);
+  const [gameTypeSelectionStage, setGameTypeSelectionStage] = useState(
+    gameState.gameTypeSelectionStage ?? true
+  );
   const [gameType, setGameType] = useState(gameState.gameType ?? "");
   const [entryStage, setEntryStage] = useState(gameState.entryStage ?? true);
   const [pauseGame, setPauseGame] = useState(gameState.pauseGame ?? false);
   const [gameover, setGameover] = useState(false);
-  const [focusedButtonId, setFocusedButtonId] = useState(
-    (!gameState.continueGame
-      ? gameState.focusedButtonId
-        ? gameState.focusedButtonId
-        : 1
-      : gameState.focusedButtonId) ?? 1
-  );
   const [continueGame, setContinueGame] = useState(
     gameState.continueGame ?? false
   );
@@ -73,10 +68,11 @@ const useGameState = () => {
       score,
       chanceLeft,
       currentTime,
-      focusedButtonId,
       pauseGame,
       entryStage,
       continueGame,
+      gameType,
+      gameTypeSelectionStage,
       currenTimeStoper: currenTimeStoper.current,
       successiveWordAnswers: successiveWordAnswers.current,
       stageNumber: stageNumber.current,
@@ -86,7 +82,7 @@ const useGameState = () => {
       falseShoot: falseShoot.current,
       trueShoot: trueShoot.current,
     });
-  }, [pauseGame, focusedButtonId, continueGame]);
+  }, [pauseGame, continueGame]);
 
   return {
     // States
@@ -102,8 +98,6 @@ const useGameState = () => {
     setPauseGame,
     gameover,
     setGameover,
-    focusedButtonId,
-    setFocusedButtonId,
     continueGame,
     setContinueGame,
     gameType,
