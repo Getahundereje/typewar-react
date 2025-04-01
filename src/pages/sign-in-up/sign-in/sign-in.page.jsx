@@ -8,8 +8,13 @@ import { UserContext } from "../../../contexts/user/user.context";
 
 import "../sign-in-up.styles.css";
 import SuccessMessage from "../../../components/success-message/success-message.component";
+import LoadingSpinner from "../../../components/loading-spinner/loading-spinner.component";
+import useLocalStorage from "../../../hooks/useLocalStorage";
 
 function SignIn() {
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useLocalStorage("remember_me", false);
+
   const [email, setEamil] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,10 +28,13 @@ function SignIn() {
   const navigate = useNavigate();
 
   function handleChanges(e) {
-    e.preventDefault();
-
     setErrorMessage("");
     const { name, value } = e.target;
+
+    if (name === "remember-me") {
+      setRememberMe(e.target.checked);
+    }
+
     if (name === "email") {
       setEamil(value);
     } else if (name === "password") {
@@ -63,6 +71,7 @@ function SignIn() {
         {
           email,
           password,
+          rememberMe,
         },
         {
           withCredentials: true,
@@ -70,13 +79,34 @@ function SignIn() {
       );
       const { data } = response;
       userContext.updateUser(data.data);
-      console.log(data.data);
 
       if (data.status === "succuss") {
         setShowSuccess(true);
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
+    }
+  }
+
+  async function handleRememberMe() {
+    if (rememberMe) {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/auth/rememberMe",
+          {
+            withCredentials: true,
+          }
+        );
+        const { data } = response;
+
+        if (data.status === "succuss") {
+          userContext.updateUser(data.data);
+          navigate("/game/homepage");
+        }
+      } catch (error) {
+        setLoading(false);
+        console.log(error.response.data.message);
+      }
     }
   }
 
@@ -98,7 +128,15 @@ function SignIn() {
     validateInput();
   }, [email, password]);
 
-  return (
+  useEffect(() => {
+    if (rememberMe) {
+      handleRememberMe();
+    }
+  }, []);
+
+  return loading ? (
+    <LoadingSpinner />
+  ) : (
     <>
       <section className="sign-in-up-container">
         <p className="title">
@@ -139,6 +177,8 @@ function SignIn() {
             id="remember-me"
             className="checkbox"
             label="Remember me"
+            checked={rememberMe}
+            onChange={handleChanges}
           />
         </form>
         <div className="alternative-options">

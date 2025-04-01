@@ -8,8 +8,11 @@ import { UserContext } from "../../../contexts/user/user.context";
 
 import "../sign-in-up.styles.css";
 import SuccessMessage from "../../../components/success-message/success-message.component";
+import useLocalStorage from "../../../hooks/useLocalStorage";
 
 function SignUp() {
+  const [, setRememberMe] = useLocalStorage("remember_me", false);
+
   const [email, setEamil] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -77,6 +80,7 @@ function SignUp() {
       userContext.updateUser(data.data);
 
       if (data.status === "succuss") {
+        setRememberMe(false);
         setShowSuccess(true);
       }
     } catch (error) {
@@ -151,13 +155,6 @@ function SignUp() {
             Sign up
           </FormCustomButton>
           {errorMessage ? <p className="error-message">{errorMessage}</p> : " "}
-          <FormInput
-            type="checkbox"
-            name="remember-me"
-            id="remember-me"
-            className="checkbox"
-            label="Remember me"
-          />
         </form>
         <div className="alternative-options">
           <FormCustomButton className="alternative-options-button">

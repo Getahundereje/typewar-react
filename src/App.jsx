@@ -21,6 +21,7 @@ function App() {
         <BulletsProvider>
           <WordsProvider>
             <Routes>
+              <Route index element={<SignIn />} />
               <Route path="signin" element={<SignIn />} />
               <Route path="signup" element={<SignUp />} />
               <Route path="game">
