@@ -12,6 +12,7 @@ import { UserProvider } from "./contexts/user/user.context";
 
 import "./App.css";
 import HelpPage from "./pages/game/game-help/game-help.page";
+import ComingSoon from "./components/comming-soon/comming-soon.component";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="signup" element={<SignInSignUp signIn={false} />} />
               <Route path="game">
                 <Route path="homepage" element={<GameHomepage />} />
+                <Route path="comingSoon" element={<ComingSoon />} />
                 <Route path="gamePage" element={<GamePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="stats" element={<StatsPage />} />

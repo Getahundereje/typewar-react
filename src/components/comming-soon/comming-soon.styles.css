@@ -1,0 +1,92 @@
+.tactical-container {
+  background-color: #0a1a0f;
+  color: #c8d6c5;
+  font-family: "Courier New", monospace;
+  border: 1px solid #2a4d2e;
+  max-width: 800px;
+  height: 600px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 0 15px rgba(10, 50, 20, 0.7);
+  overflow: hidden;
+}
+
+.header-strip,
+.footer-strip {
+  background-color: #122015;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a4d2e;
+}
+
+.footer-strip {
+  border-top: 1px solid #2a4d2e;
+  border-bottom: none;
+  justify-content: center;
+}
+
+.stripe-left,
+.stripe-right {
+  flex-grow: 1;
+  height: 2px;
+  background-color: #3a6b3f;
+}
+
+.stripe-center {
+  padding: 0 20px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #8ba888;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.comming-soon-container {
+  margin-top: 4rem;
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.radar-sweep {
+  width: 150px;
+  height: 150px;
+  border: 2px solid #3a6b3f;
+  border-radius: 50%;
+  margin: 0 auto 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.radar-sweep::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    rgba(58, 107, 63, 0) 50%,
+    rgba(58, 107, 63, 0.3) 100%
+  );
+  animation: radarSweep 3s linear infinite;
+}
+
+@keyframes radarSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.comming-soon-title {
+  color: #e0e0e0;
+  font-size: 28px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(58, 107, 63, 0.7);
+}

@@ -169,6 +169,10 @@ function GamePage() {
   function handleGameTypeSelectionButton(e) {
     e.preventDefault();
 
+    if (e.target.name === "multiplayer") {
+      navigate("/game/comingSoon");
+    }
+
     setGameType(e.target.name);
     setGameTypeSelectionStage(false);
   }

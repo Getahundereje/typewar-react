@@ -207,7 +207,7 @@ function SignInSignUp({ signIn = true }) {
     }
 
     validateInput();
-  }, [fullName, email, password]);
+  }, [fullName, email, password, showSignIn]);
 
   useEffect(() => {
     if (rememberMe) {
