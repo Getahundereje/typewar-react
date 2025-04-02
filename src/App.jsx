@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import SignUp from "./pages/sign-in-up/sign-up/sign-up.page";
-import SignIn from "./pages/sign-in-up/sign-in/sign-in.page";
+import SignInSignUp from "./pages/sign-in-up/sign-in-up/sign-in-up.page";
 import GameHomepage from "./pages/game/homepage/homepage.page";
 import GamePage from "./pages/game/game-page/game-page.page";
 import SettingsPage from "./pages/game/settings/settings.page";
@@ -21,9 +20,9 @@ function App() {
         <BulletsProvider>
           <WordsProvider>
             <Routes>
-              <Route index element={<SignIn />} />
-              <Route path="signin" element={<SignIn />} />
-              <Route path="signup" element={<SignUp />} />
+              <Route index element={<SignInSignUp />} />
+              <Route path="signin" element={<SignInSignUp />} />
+              <Route path="signup" element={<SignInSignUp signIn={false} />} />
               <Route path="game">
                 <Route path="homepage" element={<GameHomepage />} />
                 <Route path="gamePage" element={<GamePage />} />

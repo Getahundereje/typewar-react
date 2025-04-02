@@ -89,7 +89,7 @@ form {
   text-align: center;
 }
 
-.have-account span a {
+.have-account span {
   margin-left: 8px;
   text-decoration: none;
   color: #ffd700;
@@ -97,7 +97,7 @@ form {
   transition: all 0.3s ease;
 }
 
-.have-account span a:hover {
+.have-account span:hover {
   color: #ffffff;
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
