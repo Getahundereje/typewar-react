@@ -1,23 +1,23 @@
 class Bullet {
-  constructor(context, canvasWidth, x, y, velocity, radius) {
+  constructor(context, x, y, angle, radius) {
     this.ctx = context;
-    this.canvasWidth = canvasWidth;
     this.x = x;
     this.y = y;
     this.radius = radius;
-    this.velocity = velocity;
+    this.angle = angle;
+    this.speed = 15;
   }
 
   draw() {
-    this.ctx.fillStyle = "red";
+    this.ctx.fillStyle = "#B87333";
     this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     this.ctx.fill();
   }
 
   update() {
     this.draw();
-    this.x += this.velocity.x;
-    this.y -= this.velocity.y;
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
   }
 
   isCollidedWithWord(wordRect) {
@@ -34,21 +34,9 @@ class Bullets {
     this.bullets.push(bullet);
   }
 
-  draw() {
-    this.bullets.forEach((bullet) => bullet.draw());
-  }
-
   update() {
-    this.bullets = this.bullets.filter((bullet) => {
+    this.bullets.forEach((bullet) => {
       bullet.update();
-      if (
-        (bullet.x + bullet.radius > this.canvasWidth &&
-          bullet.x - bullet.radius < 0) ||
-        bullet.y - bullet.radius < 0
-      ) {
-        return false;
-      }
-      return true;
     });
   }
 

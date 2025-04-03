@@ -4,6 +4,7 @@ class Ship {
     this.y = y;
     this.originalAngle = -Math.PI / 2;
     this.aimAngle = this.originalAngle;
+    this.shootAngle = this.aimAngle;
     this.scale = 0.4;
     this.image = new Image();
     this.image.src = "/assets/game-assets/images/Ship.png";
@@ -11,7 +12,6 @@ class Ship {
 
     this.image.onload = () => {
       this.imageLoaded = true;
-      console.log("Image loaded successfully");
     };
   }
 
@@ -31,9 +31,11 @@ class Ship {
       const { x: wordX, y: wordY, width: wordWidth } = word.getWordRect();
       const wordCenterX = wordX + wordWidth / 2;
       targetAngle = Math.atan2(wordY - this.y, wordCenterX - this.x);
+      this.shootAngle = targetAngle;
     } else {
       targetAngle = this.originalAngle;
     }
+
     this.smoothRotate(targetAngle);
   }
 

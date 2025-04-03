@@ -12,7 +12,6 @@ import { BulletsContext } from "../../../contexts/bullets/bullets.context";
 import { UserContext } from "../../../contexts/user/user.context";
 
 import spawnWords from "../../../utilis/functions/spawn-words.jsx";
-import calculateIntercept from "../../../utilis/functions/calculate-intercept";
 import useSessionStorage from "../../../hooks/useSessionStorage.jsx";
 
 import LoadingSpinner from "../../../components/loading-spinner/loading-spinner.component";
@@ -241,24 +240,19 @@ function GamePage() {
           shooter.current
         ]?.notSelectedLetters.startsWith(selectedCharacter)
       ) {
-        const { velocity } = calculateIntercept(
-          wordsContext.currentSelectedWord.current[shooter.current],
-          {
-            x: canvasWidth.current / 2 - 10,
-            y: canvasHeight.current - 23,
-          },
-          10
-        );
-
         gameSounds.bulletShoot.play();
+        ship.current.update(
+          canvasCtx.current,
+          wordsContext.currentSelectedWord.current[shooter.current]
+        );
+        const shipTip = ship.current.getTipPosition();
 
         bullets.shootBullets(
           new Bullet(
             canvasCtx.current,
-            canvasWidth.current,
-            canvasWidth.current / 2 - 10,
-            canvasHeight.current - 23,
-            { x: velocity.vx, y: Math.abs(velocity.vy) },
+            shipTip.x,
+            shipTip.y,
+            ship.current.shootAngle,
             3
           )
         );
