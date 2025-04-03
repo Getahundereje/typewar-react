@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 import axios from "axios";
 
 import { Bullet } from "../../../utilis/class/bullet";
-import Gun from "../../../utilis/class/gun";
+import Ship from "../../../utilis/class/ship";
 import { WordsContext } from "../../../contexts/words/words.context";
 import { BulletsContext } from "../../../contexts/bullets/bullets.context";
 import { UserContext } from "../../../contexts/user/user.context";
@@ -99,6 +99,7 @@ function GamePage() {
   const canvasCtx = useRef({});
 
   const maxNumberOfWordsOnScreen = 7;
+  const ship = useRef(null);
 
   const gameSounds = {
     menu: new Howl({
@@ -563,6 +564,17 @@ function GamePage() {
   }, [pauseGame, gameover]);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    canvasCtx.current = canvas.getContext("2d");
+
+    const style = getComputedStyle(canvas);
+    canvasWidth.current = canvas.width = Number.parseInt(style.width);
+    canvasHeight.current = canvas.height = Number.parseInt(style.height);
+
+    ship.current = new Ship(canvas.width / 2 - 18, canvas.height - 70);
+  }, []);
+
+  useEffect(() => {
     if (!gameTypeSelectionStage) {
       if (wordsContext.wordsCollection.length && !pauseGame) {
         if (entryStage) {
@@ -585,12 +597,6 @@ function GamePage() {
           }, 3000);
         } else if (!gameover) {
           let animationFrameId = null;
-          const canvas = canvasRef.current;
-          canvasCtx.current = canvas.getContext("2d");
-
-          const style = getComputedStyle(canvas);
-          canvasWidth.current = canvas.width = Number.parseInt(style.width);
-          canvasHeight.current = canvas.height = Number.parseInt(style.height);
 
           function handleCharactreClick(e) {
             if (e.keyCode >= 65 && e.keyCode <= 90) {
@@ -637,11 +643,10 @@ function GamePage() {
               canvasHeight.current
             );
 
-            new Gun(
+            ship.current.update(
               canvasCtx.current,
-              canvasWidth.current / 2 - 20,
-              canvasHeight.current - 20
-            ).draw();
+              wordsContext.currentSelectedWord.current[shooter.current]
+            );
 
             handleBulletHit(wordsContext);
             wordsContext.currentSelectedWords.current.update(canvasCtx.current);
@@ -715,7 +720,6 @@ function GamePage() {
             document.removeEventListener("keydown", handleCharactreClick);
           };
         }
-        console.log("hello");
       }
     }
   }, [
