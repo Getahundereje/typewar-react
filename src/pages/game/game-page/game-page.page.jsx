@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useRef, useEffect } from "react";
+import { useContext, useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Howl } from "howler";
 import { io } from "socket.io-client";
@@ -23,6 +23,7 @@ import updatePlayerSetting from "../../../utilis/functions/updatePlayerState.js"
 import GameCustomButton from "../../../components/game-custom-button/game-custom-button.component.jsx";
 
 import "./game-page.styles.css";
+import Message from "../../../components/message/message.component.jsx";
 
 const gameSettingsProperty = {
   staged: {
@@ -46,11 +47,6 @@ function GamePage() {
   const [playerState, setPlayerState] = useSessionStorage(
     "playerState",
     userContext.user?.playerState || ""
-  );
-
-  const [reloadHandled, setReloadHandled] = useSessionStorage(
-    "reloadHandled",
-    false
   );
 
   const {
@@ -89,6 +85,10 @@ function GamePage() {
     resetGameStates,
   } = useGameState();
 
+  const [showMessage, setShowMessage] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
+  const message = useRef({});
+
   const canvasRef = useRef();
   let { current: styles } = useRef([]);
   const socket = useRef(null);
@@ -100,36 +100,7 @@ function GamePage() {
   const maxNumberOfWordsOnScreen = 7;
   const ship = useRef(null);
 
-  const gameSounds = {
-    menu: new Howl({
-      src: ["/assets/game-assets/sound/menu.mp3"],
-      volume: Number.parseFloat(playerState.setting.soundVolume),
-    }),
-    wordCompletion: new Howl({
-      src: ["/assets/game-assets/sound/yay.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-    bulletShoot: new Howl({
-      src: ["/assets/game-assets/sound/shoot.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-    collision: new Howl({
-      src: ["/assets/game-assets/sound/collision.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-    vanishing: new Howl({
-      src: ["/assets/game-assets/sound/vanishing.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-    error: new Howl({
-      src: ["/assets/game-assets/sound/error.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-    gameover: new Howl({
-      src: ["/assets/game-assets/sound/gameOver.mp3"],
-      volume: Number.parseFloat(playerState.setting.gameSoundVolume),
-    }),
-  };
+  const gameSounds = useRef({});
 
   function resetGame() {
     wordsContext.reset();
@@ -175,6 +146,7 @@ function GamePage() {
 
     setGameType(e.target.name);
     setGameTypeSelectionStage(false);
+    if (!continueGame) setShowLoading(true);
   }
 
   function timer(minute, currentTime, dedactedTime) {
@@ -240,7 +212,7 @@ function GamePage() {
           shooter.current
         ]?.notSelectedLetters.startsWith(selectedCharacter)
       ) {
-        gameSounds.bulletShoot.play();
+        gameSounds.current.bulletShoot.play();
         ship.current.update(
           canvasCtx.current,
           wordsContext.currentSelectedWord.current[shooter.current]
@@ -282,7 +254,7 @@ function GamePage() {
           }
 
           if (playerState.setting.gameMode !== "practice") {
-            gameSounds.error.play();
+            gameSounds.current.error.play();
             successiveWordAnswers.current = 0;
             styles.push({
               type: "deduction",
@@ -313,7 +285,7 @@ function GamePage() {
           wordsContext.selectedWordInfo.current[shooter.current].rect
         )
     ) {
-      gameSounds.collision.play();
+      gameSounds.current.collision.play();
       wordsContext.currentSelectedWord.current[
         shooter.current
       ].setCollidedLetter();
@@ -416,7 +388,7 @@ function GamePage() {
           socket.current.emit("updateScore");
         }
 
-        gameSounds.wordCompletion.play();
+        gameSounds.current.wordCompletion.play();
         wordsContext.currentSelectedWord.current[shooter.current] = undefined;
       } else if (gameType === "singlePlayer") {
         styles.push({
@@ -445,26 +417,25 @@ function GamePage() {
       wordsContext.setWordsCollection(data.data.words);
     } catch (error) {
       if (error.status === 401) {
-        navigate("/signin", {
-          replace: true,
-        });
+        message.current = {
+          message: "Session expired.\nPlease sign in to continue",
+          type: "error",
+          onClose: () => {
+            navigate("/signin", {
+              replace: true,
+            });
+          },
+        };
+        setShowMessage(true);
       }
     }
   }
 
   useEffect(() => {
     const [navigation] = performance.getEntriesByType("navigation");
-    if (navigation.type === "reload" && !reloadHandled) {
-      resetGame();
-      setReloadHandled(true);
-      navigate("/game/homepage", { replace: true });
-    } else if (navigation.type === "back_forward") {
+    if (navigation.type === "reload") {
       resetGame();
     }
-
-    window.addEventListener("beforeunload", () => {
-      setReloadHandled(false);
-    });
 
     return () => {
       resetGameStates();
@@ -472,42 +443,45 @@ function GamePage() {
   }, []);
 
   useEffect(() => {
-    if (!wordsContext.wordsCollection.length && gameType === "singlePlayer") {
-      getWords();
-      shooter.current = "single";
-    } else if (gameType === "multiplayer" && !socket.current) {
-      socket.current = io("http://localhost:8000", {
-        withCredentials: true,
-      });
+    if (gameType) {
+      if (!wordsContext.wordsCollection.length && gameType === "singlePlayer") {
+        getWords();
+        shooter.current = "single";
+      }
+      //else if (gameType === "multiplayer" && !socket.current) {
+      //     socket.current = io("http://localhost:8000", {
+      //       withCredentials: true,
+      //     });
 
-      socket.current.on("gameStart", (data) => {
-        wordsContext.wordsPosition.current = data.data.wordsPosition;
-        wordsContext.setWordsCollection(data.data.wordsCollection);
-        setWaitingOpponent(false);
-      });
+      //     socket.current.on("gameStart", (data) => {
+      //       wordsContext.wordsPosition.current = data.data.wordsPosition;
+      //       wordsContext.setWordsCollection(data.data.wordsCollection);
+      //       setWaitingOpponent(false);
+      //     });
 
-      socket.current.on("select", ({ selectedCharacter, shooterId }) => {
-        wordsContext.currentSelectedCharacter.current = selectedCharacter;
-        shooter.current = shooterId;
-      });
+      //     socket.current.on("select", ({ selectedCharacter, shooterId }) => {
+      //       wordsContext.currentSelectedCharacter.current = selectedCharacter;
+      //       shooter.current = shooterId;
+      //     });
 
-      socket.current.on("playerDisconnected", () => {
-        setWaitingOpponent(true);
-      });
+      //     socket.current.on("playerDisconnected", () => {
+      //       setWaitingOpponent(true);
+      //     });
 
-      socket.current.on("score", (score) => {
-        setScore(score);
-      });
+      //     socket.current.on("score", (score) => {
+      //       setScore(score);
+      //     });
 
-      socket.current.on("timeout", () => {
-        setGameover(true);
-      });
+      //     socket.current.on("timeout", () => {
+      //       setGameover(true);
+      //     });
 
-      socket.current.on("error", (message) => {
-        console.log(message);
-      });
+      //     socket.current.on("error", (message) => {
+      //       console.log(message);
+      //     });
 
-      socket.current.emit("ready", userContext.user._id);
+      //     socket.current.emit("ready", userContext.user._id);
+      //   }
     }
 
     return () => {
@@ -565,12 +539,51 @@ function GamePage() {
     canvasWidth.current = canvas.width = Number.parseInt(style.width);
     canvasHeight.current = canvas.height = Number.parseInt(style.height);
 
+    gameSounds.current = {
+      menu: new Howl({
+        src: ["/assets/game-assets/sound/menu.mp3"],
+        volume: Number.parseFloat(playerState.setting.soundVolume),
+        preload: true,
+      }),
+      wordCompletion: new Howl({
+        src: ["/assets/game-assets/sound/yay.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+      bulletShoot: new Howl({
+        src: ["/assets/game-assets/sound/shoot.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+      collision: new Howl({
+        src: ["/assets/game-assets/sound/collision.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+      vanishing: new Howl({
+        src: ["/assets/game-assets/sound/vanishing.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+      error: new Howl({
+        src: ["/assets/game-assets/sound/error.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+      gameover: new Howl({
+        src: ["/assets/game-assets/sound/gameOver.mp3"],
+        volume: Number.parseFloat(playerState.setting.gameSoundVolume),
+        preload: true,
+      }),
+    };
+
     ship.current = new Ship(canvas.width / 2 - 18, canvas.height - 70);
   }, []);
 
   useEffect(() => {
     if (!gameTypeSelectionStage) {
       if (wordsContext.wordsCollection.length && !pauseGame) {
+        setShowLoading(false);
         if (entryStage) {
           setTimeout(() => {
             setEntryStage(false);
@@ -649,7 +662,7 @@ function GamePage() {
               wordsContext.currentSelectedWords.current.wordIsBellowWall();
 
             if (vanishedWords.length) {
-              gameSounds.vanishing.play();
+              gameSounds.current.vanishing.play();
               successiveWordAnswers.current = 0;
               vanishedWords.forEach((vanishedWord) => {
                 if (
@@ -701,7 +714,7 @@ function GamePage() {
 
             if (chanceLeft === 0) {
               setGameover(true);
-              gameSounds.gameover.play();
+              gameSounds.current.gameover.play();
             }
 
             bullets.update();
@@ -783,7 +796,7 @@ function GamePage() {
           )
         )
       ) : (
-        !continueGame && (
+        showLoading && (
           <LoadingSpinner
             message={
               gameType === "multiplayer" ? "Waiting for opponent..." : "Loading"
@@ -791,7 +804,7 @@ function GamePage() {
           />
         )
       )}
-      {!pauseGame && !gameover && !gameTypeSelectionStage && (
+      {!pauseGame && !gameover && !gameTypeSelectionStage && !showLoading && (
         <StatsBoard
           score={score}
           gameMode={playerState.setting.gameMode}
@@ -800,35 +813,33 @@ function GamePage() {
         />
       )}
       <canvas ref={canvasRef} className="game-canvas" />
-      {styles.length
-        ? styles.map((style, i) => {
-            return (
-              <p
-                className="bonus"
-                key={i}
-                onAnimationEnd={() => removeStyle(i)}
-                style={{
-                  ...style.style,
-                  width: "fit-content",
-                  height: "fit-content",
-                  fontSize: "24px",
-                  position: "absolute",
-                  color: `${
-                    style.type === "deduction" ? "#FF4444" : "#ffd700"
-                  }`,
-                  animation: `${
-                    style.type === "deduction"
-                      ? "moveDown 2s forwards ease-in-out"
-                      : "moveUp 2s forwards ease-in-out"
-                  }`,
-                }}
-              >
-                {style.type === "deduction" ? "-" : "+"}
-                {style.value}
-              </p>
-            );
-          })
-        : ""}
+      {styles.length &&
+        styles.map((style, i) => {
+          return (
+            <p
+              className="bonus"
+              key={i}
+              onAnimationEnd={() => removeStyle(i)}
+              style={{
+                ...style.style,
+                width: "fit-content",
+                height: "fit-content",
+                fontSize: "24px",
+                position: "absolute",
+                color: `${style.type === "deduction" ? "#FF4444" : "#ffd700"}`,
+                animation: `${
+                  style.type === "deduction"
+                    ? "moveDown 2s forwards ease-in-out"
+                    : "moveUp 2s forwards ease-in-out"
+                }`,
+              }}
+            >
+              {style.type === "deduction" ? "-" : "+"}
+              {style.value}
+            </p>
+          );
+        })}
+      {showMessage && <Message {...message.current} />}
     </div>
   );
 }

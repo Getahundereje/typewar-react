@@ -8,7 +8,7 @@ import FormCustomButton from "../../../components/form-custom-button/form-custom
 import { UserContext } from "../../../contexts/user/user.context";
 
 import "./sign-in-up.styles.css";
-import SuccessMessage from "../../../components/success-message/success-message.component";
+import Message from "../../../components/message/message.component";
 import LoadingSpinner from "../../../components/loading-spinner/loading-spinner.component";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 
@@ -31,7 +31,7 @@ function SignInSignUp({ signIn = true }) {
   const [fullNameIsValid, setFullNameIsValid] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ function SignInSignUp({ signIn = true }) {
       userContext.updateUser(data.data);
 
       if (data.status === "succuss") {
-        setShowSuccess(true);
+        setShowMessage(true);
         setUsingOAuth(true);
       }
     } catch (error) {
@@ -117,7 +117,7 @@ function SignInSignUp({ signIn = true }) {
       userContext.updateUser(data.data);
 
       if (data.status === "succuss") {
-        setShowSuccess(true);
+        setShowMessage(true);
       }
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -146,7 +146,7 @@ function SignInSignUp({ signIn = true }) {
 
       if (data.status === "succuss") {
         setRememberMe(false);
-        setShowSuccess(true);
+        setShowMessage(true);
         setFullName("");
         setEmail("");
         setPassword("");
@@ -303,23 +303,24 @@ function SignInSignUp({ signIn = true }) {
         <span
           onClick={handlePageChange}
           style={{
-            pointerEvents: !showSuccess ? "auto" : "none",
-            opacity: !showSuccess ? 1 : 0.5,
-            cursor: !showSuccess ? "pointer" : "not-allowed",
+            pointerEvents: !showMessage ? "auto" : "none",
+            opacity: !showMessage ? 1 : 0.5,
+            cursor: !showMessage ? "pointer" : "not-allowed",
           }}
         >
           {showSignIn ? "Sign up" : "Sign In"}
         </span>
       </p>
-      {showSuccess && (
-        <SuccessMessage
+      {showMessage && (
+        <Message
+          type="success"
           message={
             showSignIn || usingOAuth
               ? "Loged in successfully."
               : "Sign up successfully"
           }
           onClose={() => {
-            setShowSuccess(false);
+            setShowMessage(false);
             if (showSignIn || usingOAuth) {
               navigate("/game/homepage", { replace: true });
             } else {

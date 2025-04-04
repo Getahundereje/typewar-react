@@ -80,7 +80,7 @@ function SettingsPage() {
             id="soundVolume"
             name="soundVolume"
             min="0"
-            max="1"
+            max="0.5"
             step="0.1"
             value={sound}
             onChange={handleChange}
@@ -92,7 +92,7 @@ function SettingsPage() {
             type="range"
             name="gameSoundVolume"
             min="0"
-            max="1"
+            max="0.5"
             step="0.1"
             value={gameSound}
             onChange={handleChange}
@@ -129,7 +129,7 @@ function SettingsPage() {
                 value="practice"
                 checked={gameMode === "practice"}
                 onChange={handleChange}
-                disabled={disabled}
+                disabled={true}
               />
             </div>
           </div>

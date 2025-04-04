@@ -1,13 +1,12 @@
-/* Success Message Styles */
-.success-message-container {
+.message-container {
   position: fixed;
   top: 20px;
   right: 40px;
-  z-index: 10;
+  z-index: 20;
   animation: fadeInRight 0.5s ease-out forwards;
 }
 
-.success-message {
+.message-container .message {
   background: rgba(30, 30, 30, 0.95);
   color: #f8f8f8;
   border-radius: 6px;
@@ -18,13 +17,13 @@
   width: 300px;
 }
 
-.success-content {
+.message-container .content {
   display: flex;
   align-items: center;
   padding: 15px 20px;
 }
 
-.success-icon {
+.message-container .icon {
   font-size: 22px;
   margin-right: 15px;
   color: #4caf50;
@@ -32,22 +31,22 @@
   font-weight: bold;
 }
 
-.success-message p {
+.message-container .message p {
   font-family: "Rajdhani", sans-serif;
   font-weight: 600;
   margin: 0;
   flex-grow: 1;
 }
 
-.progress-bar-container {
+.message-container .progress-bar-container {
   height: 4px;
   background: rgba(20, 20, 20, 0.8);
   width: 100%;
 }
 
-.progress-bar {
+.message-container .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #4caf50, #2e7d32);
+  background: #4caf50;
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
   transition: width 0.05s linear;
 }
