@@ -106,7 +106,7 @@ function GamePage() {
   function handleGameoverButton(e) {
     e.preventDefault();
 
-    resetGame();
+    resetGame(e.target.name !== "menu" ? "restart" : "");
     if (e.target.name === "menu") {
       navigate("/game/homepage");
     }

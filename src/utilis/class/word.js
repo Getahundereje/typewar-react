@@ -149,9 +149,10 @@ class Word {
         this.dy = -this.dy;
       }, 100);
     } else {
-      const dy = this.dy;
+      const originalDy = -this.dy;
+      this.dy = 0;
       setTimeout(() => {
-        this.dy = dy;
+        this.dy = originalDy;
       }, 50);
     }
   }
