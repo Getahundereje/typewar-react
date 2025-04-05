@@ -29,7 +29,8 @@ class Ship {
     let targetAngle = null;
     if (word) {
       const { x: wordX, y: wordY, width: wordWidth } = word.getWordRect();
-      const wordCenterX = wordX + wordWidth / 2;
+      const wordCenterX =
+        wordX < this.x ? wordX + wordWidth / 2 : wordX + wordWidth;
       targetAngle = Math.atan2(wordY - this.y, wordCenterX - this.x);
       this.shootAngle = targetAngle;
     } else {

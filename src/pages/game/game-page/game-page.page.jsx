@@ -220,7 +220,7 @@ function GamePage() {
             shipTip.x,
             shipTip.y,
             ship.current.shootAngle,
-            3
+            4
           )
         );
 
@@ -572,7 +572,7 @@ function GamePage() {
       }),
     };
 
-    ship.current = new Ship(canvas.width / 2 - 18, canvas.height - 70);
+    ship.current = new Ship(canvas.width / 2 - 18, canvas.height - 35);
   }, []);
 
   useEffect(() => {
