@@ -9,11 +9,10 @@ async function updatePlayerSetting(newState) {
         withCredentials: true,
       }
     );
-    const { data } = response;
-    return data.data;
+
+    return response.status;
   } catch (error) {
-    console.log(error);
-    return {};
+    return error.status;
   }
 }
 

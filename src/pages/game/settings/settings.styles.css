@@ -28,7 +28,8 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: #a5bfcc8a;
   width: 80%;
-  height: 70%;
+  height: 75%;
+  position: relative;
 }
 
 .settings-container .card .card-header {
@@ -75,4 +76,24 @@
   gap: 10px;
   height: 80%;
   width: fit-content;
+}
+
+.settings-container .save-button {
+  position: absolute;
+  bottom: 5px;
+  right: 40px;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: "Bungee Spice", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-container .save-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.8);
 }

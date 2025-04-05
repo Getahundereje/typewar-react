@@ -1,73 +1,104 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import FormSliderInput from "../../../components/form-slider/form-slider.component";
 import RadioButton from "../../../components/custom-radio-button/custom-radio-button.component";
-import { UserContext } from "../../../contexts/user/user.context";
 import useSessionStorage from "../../../hooks/useSessionStorage";
 import useGameState from "../../../hooks/useGameStates";
 import { WordsContext } from "../../../contexts/words/words.context";
 import updatePlayerSetting from "../../../utilis/functions/updatePlayerState";
 
 import "./settings.styles.css";
+import Message from "../../../components/message/message.component";
 
 function SettingsPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { disabled } = location.state || false;
 
-  const userContext = useContext(UserContext);
   const [sound, setSound] = useState("0");
   const [gameSound, setGameSound] = useState("0");
   const [gameMode, setGameMode] = useState("staged");
   const [diffculty, setDiffculty] = useState("easy");
   const stateUpdated = useRef(false);
 
-  const [playerState, setPlayerState] = useSessionStorage(
-    "playerState",
-    userContext.user?.playerState || ""
-  );
+  const [showMessage, setShowMessage] = useState(false);
+  const message = useRef({});
+
+  const [playerState, setPlayerState] = useSessionStorage("playerState", "");
 
   const wordsContext = useContext(WordsContext);
 
   const { setContinueGame, resetGameStates } = useGameState();
 
-  const playerStateCopy = useRef({});
+  const [playerStateCopy, setPlayerStateCopy] = useState({ ...playerState });
+  const previousPlayerState = useRef({});
 
   function handleChange(e) {
     const { name, value } = e.target;
 
     stateUpdated.current = true;
-    playerStateCopy.current = {
-      ...playerState,
+    previousPlayerState.current = previousPlayerState.current ?? {
+      ...playerStateCopy,
+    };
+    setPlayerStateCopy({
+      ...playerStateCopy,
       setting: {
-        ...playerState.setting,
+        ...playerStateCopy.setting,
         [name]: value,
       },
-    };
+    });
 
     if (Object.keys(playerState.setting).includes(name)) {
       setContinueGame(false);
       wordsContext.reset();
       resetGameStates();
     }
+  }
 
-    setPlayerState(playerStateCopy.current);
+  async function handleSave() {
+    if (stateUpdated.current) {
+      const status = await updatePlayerSetting(playerStateCopy);
+
+      if (status === 401) {
+        message.current = {
+          message: "Session expired.\nPlease sign in to continue",
+          type: "error",
+          onClose: () => {
+            navigate("/signin", {
+              replace: true,
+            });
+          },
+        };
+        setPlayerStateCopy(previousPlayerState.current);
+        setShowMessage(true);
+      } else if (status === 201) {
+        message.current = {
+          message: "Settings changed succussfully",
+          type: "success",
+          onClose: () => {
+            setShowMessage(false);
+          },
+        };
+        setShowMessage(true);
+        setPlayerState(playerStateCopy);
+        previousPlayerState.current = { ...playerStateCopy };
+      }
+    }
   }
 
   useEffect(() => {
-    setSound(playerState.setting.soundVolume);
-    setGameSound(playerState.setting.gameSoundVolume);
-    setGameMode(playerState.setting.gameMode);
-    setDiffculty(playerState.setting.difficulty);
-  }, [playerState]);
-
-  useEffect(() => {
     return () => {
-      if (stateUpdated.current) {
-        updatePlayerSetting(playerStateCopy.current);
-      }
+      setPlayerState(previousPlayerState.current);
     };
   }, []);
+
+  useEffect(() => {
+    setSound(playerStateCopy.setting.soundVolume);
+    setGameSound(playerStateCopy.setting.gameSoundVolume);
+    setGameMode(playerStateCopy.setting.gameMode);
+    setDiffculty(playerStateCopy.setting.difficulty);
+  }, [playerStateCopy]);
 
   return (
     <div className="settings-container">
@@ -169,7 +200,11 @@ function SettingsPage() {
             </div>
           </div>
         </div>
+        <button className="save-button" onClick={handleSave}>
+          Save
+        </button>
       </div>
+      {showMessage && <Message {...message.current} />}
     </div>
   );
 }
