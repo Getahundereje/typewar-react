@@ -9,7 +9,6 @@ import { Bullet } from "../../../utilis/class/bullet";
 import Ship from "../../../utilis/class/ship";
 import { WordsContext } from "../../../contexts/words/words.context";
 import { BulletsContext } from "../../../contexts/bullets/bullets.context";
-import { UserContext } from "../../../contexts/user/user.context";
 
 import spawnWords from "../../../utilis/functions/spawn-words.jsx";
 import useSessionStorage from "../../../hooks/useSessionStorage.jsx";
@@ -40,14 +39,10 @@ const gameSettingsProperty = {
 
 function GamePage() {
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
   const wordsContext = useContext(WordsContext);
   const { bullets } = useContext(BulletsContext);
 
-  const [playerState, setPlayerState] = useSessionStorage(
-    "playerState",
-    userContext.user?.playerState || ""
-  );
+  const [playerState, setPlayerState] = useSessionStorage("playerState", "");
 
   const {
     score,
@@ -102,9 +97,9 @@ function GamePage() {
 
   const gameSounds = useRef({});
 
-  function resetGame() {
+  function resetGame(actionType) {
     wordsContext.reset();
-    resetGameStates();
+    resetGameStates(actionType);
     styles = [];
   }
 
@@ -122,7 +117,7 @@ function GamePage() {
       setContinueGame(false);
       setPauseGame(false);
     } else if (e.target.name === "restart") {
-      resetGame();
+      resetGame("restart");
     } else if (e.target.name === "options") {
       navigate("/game/settings", {
         state: { disabled: true },

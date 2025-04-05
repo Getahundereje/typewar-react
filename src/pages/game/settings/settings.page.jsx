@@ -1,11 +1,9 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import FormSliderInput from "../../../components/form-slider/form-slider.component";
 import RadioButton from "../../../components/custom-radio-button/custom-radio-button.component";
 import useSessionStorage from "../../../hooks/useSessionStorage";
-import useGameState from "../../../hooks/useGameStates";
-import { WordsContext } from "../../../contexts/words/words.context";
 import updatePlayerSetting from "../../../utilis/functions/updatePlayerState";
 
 import "./settings.styles.css";
@@ -27,10 +25,6 @@ function SettingsPage() {
 
   const [playerState, setPlayerState] = useSessionStorage("playerState", "");
 
-  const wordsContext = useContext(WordsContext);
-
-  const { setContinueGame, resetGameStates } = useGameState();
-
   const [playerStateCopy, setPlayerStateCopy] = useState({ ...playerState });
   const previousPlayerState = useRef({});
 
@@ -48,12 +42,6 @@ function SettingsPage() {
         [name]: value,
       },
     });
-
-    if (Object.keys(playerState.setting).includes(name)) {
-      setContinueGame(false);
-      wordsContext.reset();
-      resetGameStates();
-    }
   }
 
   async function handleSave() {

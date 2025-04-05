@@ -39,7 +39,7 @@ const useGameState = () => {
   const falseShoot = useRef(gameState.falseShoot ?? 0);
   const trueShoot = useRef(gameState.trueShoot ?? 0);
 
-  function resetGameStates() {
+  function resetGameStates(actionType = "normal") {
     setScore(0);
     setChanceLeft(10);
     setCurrentTime({ min: 0, sec: 0 });
@@ -47,9 +47,12 @@ const useGameState = () => {
     setPauseGame(false);
     setGameover(false);
     setContinueGame(false);
-    setGameTypeSelectionStage(true);
-    setGameType("");
     setWaitingOpponent(true);
+
+    if (actionType === "normal") {
+      setGameTypeSelectionStage(true);
+      setGameType("");
+    }
 
     clearInterval(currenTimeStoper.current);
     currenTimeStoper.current = undefined;
